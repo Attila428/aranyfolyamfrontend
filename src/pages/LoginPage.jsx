@@ -2,6 +2,7 @@ import InputField from "../components/InputField"
 import Button from "../components/button"
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import {login} from "../users"
 export default function Login() {
 
 
@@ -25,8 +26,11 @@ export default function Login() {
             const data = await login(email, psw)
             if (data.error) {
                 setHiba(data.error)
+            }else{
+                setUzenet(data.message)
+                setTimeout(() => navigate('/'), 600)
             }
-            setUzenet(data.message)
+           
 
         } catch (err) {
             setHiba('Nem sikerült kapcsolódni a backendhez.')
@@ -34,7 +38,8 @@ export default function Login() {
 
     }
     return (
-        <div
+        <>
+         <div
             className="container-fluid min-vh-100 d-flex align-items-center"
             style={{
                 background: "linear-gradient(135deg, #000000, #1a0000)"
@@ -117,6 +122,34 @@ export default function Login() {
                     </div>
                 </div>
             </div>
+            
         </div>
+        
+        <footer 
+  className="container-fluid py-3"
+  style={{ background: "linear-gradient(90deg, #000000, #1a0000)", borderTop: "1px solid #333" }}
+>
+  <div className="container d-flex justify-content-between align-items-center text-danger">
+  
+    <div className="small">
+      © 2026 Minden jog fenntartva
+    </div>
+
+
+    <div className="fw-semibold">
+      AranyFolyam
+    </div>
+
+    <div className="d-flex gap-3">
+      <i className="bi bi-facebook"></i>
+      <i className="bi bi-twitter-x"></i>
+      <i className="bi bi-tiktok"></i>
+      <i className="bi bi-instagram"></i>
+    </div>
+
+  </div>
+</footer>
+        </>
+       
     )
 }

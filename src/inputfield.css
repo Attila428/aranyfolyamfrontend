@@ -1,0 +1,17 @@
+.meno:focus {
+    border-color: red;
+    color: red;
+    box-shadow: none;
+    background-color: transparent;
+    color: red;
+}
+
+.meno::placeholder {
+    color:red;
+}
+
+.meno {
+    background-color: transparent;
+    color: red;
+    
+}

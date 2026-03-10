@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import InputField from '../components/InputField.jsx'
 import Button from '../components/button.jsx'
+import { register } from '../users.js'
 
 export default function Register() {
     const [email, setEmail] = useState('')
@@ -18,7 +19,7 @@ export default function Register() {
     async function onRegister() {
         setHiba('')
         setUzenet('')
-        //console.log(email, username, psw, psw2)
+        console.log(email, username, psw, psw2)
 
         if (!email || !username || !psw || !psw2) {
             return setHiba('Minden mezőt tölts ki!')
@@ -37,11 +38,14 @@ export default function Register() {
             setUzenet(data.message)
 
         } catch (err) {
+            console.log(err);
             setHiba('Nem sikerült kapcsolódni a backendhez.')
         }
     }
 
+    
     return (
+        <>
         <div
             className="container-fluid min-vh-100 d-flex align-items-center"
             style={{
@@ -141,5 +145,33 @@ export default function Register() {
 
             </div>
         </div>
+
+
+        <footer 
+  className="container-fluid py-3"
+  style={{ background: "linear-gradient(90deg, #000000, #1a0000)", borderTop: "1px solid #333" }}
+>
+  <div className="container d-flex justify-content-between align-items-center text-danger">
+  
+    <div className="small">
+      © 2026 Minden jog fenntartva
+    </div>
+
+
+    <div className="fw-semibold">
+      AranyFolyam
+    </div>
+
+    <div className="d-flex gap-3">
+      <i className="bi bi-facebook"></i>
+      <i className="bi bi-twitter-x"></i>
+      <i className="bi bi-tiktok"></i>
+      <i className="bi bi-instagram"></i>
+    </div>
+
+  </div>
+</footer>
+        </>
+        
     )
 }
