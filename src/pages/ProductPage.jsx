@@ -2,6 +2,7 @@ import { useState,useEffect } from 'react'
 import Product from "../components/Product"
 import NavBar from '../components/NavBar'
 import { whoami,logout } from '../users'
+import Footer from '../components/Footer'
 export default function Products() {
     const [user,setUser] = useState(null)
     const [userError, setUserError] = useState(null)
@@ -103,6 +104,7 @@ export default function Products() {
                     </div>
                 </div>
             </div>
+            <Footer/>
         </>
 
     )
