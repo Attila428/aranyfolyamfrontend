@@ -1,6 +1,7 @@
 import NavBar from "../components/NavBar"
 import { useEffect, useState } from "react"
 import { whoami,logout } from '../users'
+import Footer from "../components/Footer"
 
 
 export default function AboutUs(){
@@ -79,30 +80,7 @@ async function onLogout() {
 
   </div>
 </div>
-<footer 
-  className="container-fluid py-3"
-  style={{ background: "linear-gradient(90deg, #000000, #1a0000)", borderTop: "1px solid #333" }}
->
-  <div className="container d-flex justify-content-between align-items-center text-danger">
-  
-    <div className="small">
-      © 2025 Minden jog fenntartva
-    </div>
-
-
-    <div className="fw-semibold">
-      AranyFolyam
-    </div>
-
-    <div className="d-flex gap-3">
-      <i className="bi bi-facebook"></i>
-      <i className="bi bi-twitter-x"></i>
-      <i className="bi bi-tiktok"></i>
-      <i className="bi bi-instagram"></i>
-    </div>
-
-  </div>
-</footer>
+<Footer/>
         </>
     )
 }

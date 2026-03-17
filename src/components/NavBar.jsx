@@ -8,7 +8,7 @@ export default function NavBar({ user, onLogout }) {
     const [menuOpen, setMenuOpen] = useState(false)
 
     const isLoggedIn = !!user
-    const isAdmin = user?.role === "admin"
+    const isAdmin = user?.user_role === "admin"
 
     return (
         <div
@@ -42,7 +42,7 @@ export default function NavBar({ user, onLogout }) {
                             <Link
                                 className="px-3 py-1 text-decoration-none rounded"
                                 style={{ fontSize: 20, color: "red" }}
-                                to="/login"
+                                to="/"
                             >
                                 HomePage
                             </Link>
