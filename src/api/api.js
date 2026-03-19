@@ -27,3 +27,21 @@ export async function deleteUser(user_id) {
         console.error(err)
     }
 }
+
+export async function editUser(user_id, user_username,user_email,user_role) {
+    try {     
+        const res = await fetch(`${BACKEND_URL}/update/user/${user_id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({user_username,user_email,user_role}),
+            credentials: "include"
+        });
+        // console.log("a");
+        console.log(user_username,user_email,user_role);
+        return await res.json();
+    } catch (err) {
+        console.log(err)
+    }
+}

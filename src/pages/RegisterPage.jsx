@@ -5,6 +5,8 @@ import InputField from '../components/InputField.jsx'
 import Button from '../components/button.jsx'
 import { register } from '../users.js'
 
+import Footer from "../components/Footer"
+
 export default function Register() {
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
@@ -145,9 +147,7 @@ export default function Register() {
 
             </div>
         </div>
-
-
-       <Footer/>
+        <Footer/>
         </>
         
     )
