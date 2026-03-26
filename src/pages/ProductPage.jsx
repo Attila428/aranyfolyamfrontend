@@ -3,9 +3,12 @@ import Product from "../components/Product"
 import NavBar from '../components/NavBar'
 import { whoami,logout } from '../users'
 import Footer from '../components/Footer'
+import { getAllProduct } from '../api/api'
+
 export default function Products() {
     const [user,setUser] = useState(null)
     const [userError, setUserError] = useState(null)
+    const [allProduct, setAllProduct] = useState(null)
 
     useEffect(()=>{
         async function load() {
@@ -28,6 +31,17 @@ export default function Products() {
         navigate('/')
     }
 
+    useEffect(() =>{
+        async function loadProduct() {
+            const data = await getAllProduct()
+            if(!data.error){
+                return setAllProduct(data)
+            }
+            return setErrorAllUsers(data.error)
+        }
+
+        loadProduct()
+    }, [])
     return (
 
         <>
@@ -38,69 +52,7 @@ export default function Products() {
             }}>
                 <div className='container'>
                     <div className='row row-gap-4'>
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
-                        <Product
-                            imgSrc={"https://swisswatches.hu/wp-content/uploads/2024/06/IMG_2258-scaled.jpeg"}
-                            categoryName={"óra"}
-                            productName={"Rolex"}
-                            productStock={"222"}
-                            productPrice={"100000"}
-                        />
+                        <Product allProduct={allProduct}/>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <>
+        <div className="sticky-bottom">
             <footer
                 className="container-fluid py-3"
                 style={{ background: "linear-gradient(90deg, #000000, #1a0000)", borderTop: "1px solid #333" }}
@@ -33,7 +33,7 @@ export default function Footer() {
                 </div>
             </footer>
 
-            <style jsx>{`
+            <style>{`
                 .social-icons a {
                     color: #dc3545; /* Bootstrap text-danger piros */
                     transition: color 0.2s ease-in-out;
@@ -43,6 +43,6 @@ export default function Footer() {
                     color: #e4606d; /* világosabb árnyalat hoverre */
                 }
             `}</style>
-        </>
+        </div>
     )
 }
