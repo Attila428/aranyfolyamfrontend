@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const PROXYTARGET = 'http://192.168.9.113:4000'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -15,7 +17,19 @@ export default defineConfig({
   server: {
     proxy: {
       '/users': {
-        target: 'http://192.168.9.113:4000',
+        target: PROXYTARGET,
+        changeOrigin: true
+      },
+      '/admin': {
+        target: PROXYTARGET,
+        changeOrigin: true
+      },
+      '/orders': {
+        target: PROXYTARGET,
+        changeOrigin: true
+      },
+      '/product': {
+        target: PROXYTARGET,
         changeOrigin: true
       }
     }

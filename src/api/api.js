@@ -1,4 +1,5 @@
-const BACKEND_URL = "http://192.168.9.113:4000"
+const BACKEND_URL = ""
+
 export async function getUsers() {
     try {
         const res = await fetch(`${BACKEND_URL}/admin/users`, {
@@ -10,39 +11,40 @@ export async function getUsers() {
         return data.result
     } catch (err) {
         console.error(err)
+        return { error: "Nem sikerült lekérni a usereket." }
     }
 }
 
 export async function deleteUser(user_id) {
     try {
-        console.log(user_id);
         const res = await fetch(`${BACKEND_URL}/admin/delete/user/${user_id}`, {
             method: "DELETE",
             credentials: "include"
         })
-        console.log(res);
+
         const data = await res.json()
         return data.result
     } catch (err) {
         console.error(err)
+        return { error: "Nem sikerült törölni a usert." }
     }
 }
 
-export async function editUser(user_id, user_username,user_email,user_role) {
-    try {     
+export async function editUser(user_id, user_username, user_email, user_role) {
+    try {
         const res = await fetch(`${BACKEND_URL}/admin/update/user/${user_id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({user_username,user_email,user_role}),
+            body: JSON.stringify({ user_username, user_email, user_role }),
             credentials: "include"
-        });
-        // console.log("a");
-        console.log(user_username,user_email,user_role);
-        return await res.json();
+        })
+
+        return await res.json()
     } catch (err) {
-        console.log(err)
+        console.error(err)
+        return { error: "Nem sikerült módosítani a usert." }
     }
 }
 
@@ -57,5 +59,27 @@ export async function getAllProduct() {
         return data.result
     } catch (err) {
         console.error(err)
+        return { error: "Nem sikerült lekérni a termékeket." }
+    }
+}
+
+export async function createOrder(user_id, items) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/orders`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id, items }),
+            credentials: "include"
+        });
+
+        const data = await res.json(); // Egyszerűbb JSON kezelés
+
+        if (!res.ok) {
+            return { error: data.error || "Sikertelen rendelés." };
+        }
+
+        return data; // Ez már a parsed objektum
+    } catch (err) {
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
     }
 }
