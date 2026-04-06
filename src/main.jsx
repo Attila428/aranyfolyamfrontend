@@ -10,6 +10,7 @@ import Login from './pages/LoginPage'
 import AboutUs from './pages/AboutUsPage'
 import ProductPage from './pages/ProductPage';
 import AdminPanel from './pages/AdminPanel';
+import Profil from './pages/Profil';
 
 
 
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
         <Route path='/aboutus' element={<AboutUs />}/>
         <Route path='/' element={<ProductPage/>}/>
         <Route path='/AdminPanel' element={<AdminPanel/>}/>
+        <Route path='/profil' element={<Profil/>}/>
       </Routes>
     </BrowserRouter>
   </StrictMode>

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const PROXYTARGET = 'http://192.168.9.113:4000'
+const PROXYTARGET = 'http://localhost:4000'
 
 // https://vite.dev/config/
 export default defineConfig({
