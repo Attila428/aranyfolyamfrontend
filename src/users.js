@@ -63,4 +63,24 @@ export async function logout() {
     return data
 }
 
+export async function updateProfile({ username, email, psw }) {
+  const res = await fetch(`${BACKEND_URL}/edit`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      user_username: username,
+      user_email: email,
+      user_psw: psw
+    })
+  });
 
+  const data = await res.json();
+  if (!res.ok) {
+    return { error: data.error };
+  }
+
+  return data;
+}
