@@ -11,13 +11,15 @@ import AboutUs from './pages/AboutUsPage'
 import ProductPage from './pages/ProductPage';
 import AdminPanel from './pages/AdminPanel';
 import Profil from './pages/Profil';
+import { AuthProvider } from './context/AuthContext';
 
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-   <BrowserRouter>
-      <Routes>
+   <AuthProvider>
+    <BrowserRouter>
+    <Routes>
         <Route path='/register' element={<Register />}/>
         <Route path='/login' element={<Login />}/>
         <Route path='/aboutus' element={<AboutUs />}/>
@@ -25,7 +27,8 @@ createRoot(document.getElementById('root')).render(
         <Route path='/AdminPanel' element={<AdminPanel/>}/>
         <Route path='/profil' element={<Profil/>}/>
       </Routes>
-    </BrowserRouter>
+   </BrowserRouter>
+   </AuthProvider>
   </StrictMode>
 )
 

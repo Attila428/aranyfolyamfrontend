@@ -1,80 +1,118 @@
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
-import { whoami, updateProfile, logout } from "../users";
-import { useNavigate } from "react-router-dom";
+import { updateProfile } from "../users";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Profil() {
-    const navigate = useNavigate();
-
-    const [user, setUser] = useState(null);
-    const [userError, setUserError] = useState(null);
+    const { user, loading, errorUser, onLogout, refreshUser } = useAuth();
 
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [psw, setPsw] = useState("");
     const [pswAgain, setPswAgain] = useState("");
+    const [saveError, setSaveError] = useState("");
+    const [saveSuccess, setSaveSuccess] = useState("");
+    const [saveLoading, setSaveLoading] = useState(false);
 
     useEffect(() => {
-        async function load() {
-            const data = await whoami();
-            if (!data.error) {
-                setUser(data);
-            } else {
-                setUserError(data.error);
-            }
+        if (user) {
+            setUsername(user.user_username || "");
+            setEmail(user.user_email || "");
         }
-        load();
-    }, []);
+    }, [user]);
 
-    async function onLogout() {
-        const data = await logout();
-        if (data.error) return setUserError(data.error);
-        setUser(null);
-        navigate("/");
+    async function handleLogout() {
+        await onLogout();
     }
 
     const handleSave = async () => {
+        setSaveError("");
+        setSaveSuccess("");
+
         if (psw !== pswAgain) {
-            alert("A két jelszó nem egyezik!");
+            setSaveError("A két jelszó nem egyezik!");
             return;
         }
 
+        setSaveLoading(true);
+
         try {
-            const res = await updateProfile({
+            const payload = {
                 username,
                 email,
-                psw
-            });
+            };
 
-            if (res.error) {
-                alert(res.error);
+            if (psw.trim() !== "") {
+                payload.psw = psw;
+            }
+
+            const res = await updateProfile(payload);
+
+            if (res?.error) {
+                setSaveError(res.error);
+                setSaveLoading(false);
                 return;
             }
 
-            alert("Sikeres módosítás!");
+            setSaveSuccess("Sikeres módosítás!");
             setPsw("");
             setPswAgain("");
+
+            await refreshUser();
         } catch (err) {
-            alert("Hiba történt a módosítás közben.");
+            setSaveError("Hiba történt a módosítás közben.");
         }
+
+        setSaveLoading(false);
     };
+
+    // ⬇️ loading alatt ne redirecteljen
+    if (loading) {
+        return <p className="text-center mt-5">Töltés...</p>;
+    }
+
+    // ⬇️ HA NINCS USER → AZONNAL DOBJA VISSZA
+    if (!user) {
+        return <Navigate to="/" replace />;
+    }
 
     return (
         <>
-            <NavBar user={user} onLogout={onLogout} />
+            <NavBar user={user} onLogout={handleLogout} />
 
             <div
-                className="container-fluid d-flex vh-100 text-light"
+                className="container-fluid d-flex min-vh-100 text-light py-5"
                 style={{ background: "linear-gradient(90deg, #000000, #1a0000)" }}
             >
-                <div className="container mt-5 text-light" style={{ maxWidth: "500px" }}>
+                <div className="container text-light" style={{ maxWidth: "500px" }}>
                     <div className="text-danger mb-4 fs-2 text-center fw-bold">
                         Profil szerkesztése
                     </div>
 
+                    {errorUser && (
+                        <div className="alert alert-danger">
+                            {errorUser}
+                        </div>
+                    )}
+
+                    {saveError && (
+                        <div className="alert alert-danger">
+                            {saveError}
+                        </div>
+                    )}
+
+                    {saveSuccess && (
+                        <div className="alert alert-success">
+                            {saveSuccess}
+                        </div>
+                    )}
+
                     <div className="mb-3">
-                        <label className="form-label text-danger fw-bold fs-5">Felhasználónév</label>
+                        <label className="form-label text-danger fw-bold fs-5">
+                            Felhasználónév
+                        </label>
                         <input
                             type="text"
                             className="form-control bg-black text-light border-danger"
@@ -84,7 +122,9 @@ export default function Profil() {
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label text-danger fw-bold fs-5">Email cím</label>
+                        <label className="form-label text-danger fw-bold fs-5">
+                            Email cím
+                        </label>
                         <input
                             type="email"
                             className="form-control bg-black text-light border-danger"
@@ -94,7 +134,9 @@ export default function Profil() {
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label text-danger fw-bold fs-5">Új jelszó</label>
+                        <label className="form-label text-danger fw-bold fs-5">
+                            Új jelszó
+                        </label>
                         <input
                             type="password"
                             className="form-control bg-black text-light border-danger"
@@ -104,7 +146,9 @@ export default function Profil() {
                     </div>
 
                     <div className="mb-4">
-                        <label className="form-label text-danger fw-bold fs-5">Jelszó megerősítése</label>
+                        <label className="form-label text-danger fw-bold fs-5">
+                            Jelszó megerősítése
+                        </label>
                         <input
                             type="password"
                             className="form-control bg-black text-light border-danger"
@@ -113,8 +157,12 @@ export default function Profil() {
                         />
                     </div>
 
-                    <button className="btn btn-danger w-100 text-white fw-bold" onClick={handleSave}>
-                        Mentés
+                    <button
+                        className="btn btn-danger w-100 text-white fw-bold"
+                        onClick={handleSave}
+                        disabled={saveLoading}
+                    >
+                        {saveLoading ? "Mentés..." : "Mentés"}
                     </button>
                 </div>
             </div>
