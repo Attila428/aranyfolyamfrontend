@@ -37,25 +37,6 @@ export default function AdminPanel() {
         return <Navigate to="/" replace />;
     }
 
-    if (user.user_role !== "admin") {
-        return (
-            <>
-                <NavBar user={user} onLogout={onLogout} />
-                <div
-                    className="container-fluid d-flex justify-content-center align-items-center vh-100"
-                    style={{ background: "linear-gradient(90deg, #000000, #1a0000)" }}
-                >
-                    <div className="border border-2 rounded-4 py-3 px-4 bg-danger border-danger">
-                        <span className="text-white fw-bold fs-5">
-                            Nincs jogosultságod az admin panel megtekintéséhez!
-                        </span>
-                    </div>
-                </div>
-                <Footer />
-            </>
-        );
-    }
-
     return (
         <>
             <NavBar user={user} onLogout={onLogout} />
