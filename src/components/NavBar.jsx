@@ -33,7 +33,7 @@ export default function NavBar({ user, onLogout }) {
                                 <Link
                                     className="px-3 py-1 text-decoration-none rounded"
                                     style={{ fontSize: 20, color: "red" }}
-                                    to="/adminpanel"
+                                    to="/AdminPanel"
                                 >
                                     AdminPanel
                                 </Link>
@@ -101,7 +101,7 @@ export default function NavBar({ user, onLogout }) {
                                 <Link
                                     className="d-block text-center py-2 text-decoration-none rounded"
                                     style={{ fontSize: 18, color: "red" }}
-                                    to="/adminpanel"
+                                    to="/AdminPanel"
                                     onClick={() => setMenuOpen(false)}
                                 >
                                     AdminPanel

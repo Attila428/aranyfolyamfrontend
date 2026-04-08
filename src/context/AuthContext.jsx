@@ -17,10 +17,12 @@ export function AuthProvider({ children }) {
             setUser(data);
             setErrorUser("");
             setLoading(false);
+            console.log(data);
+            
             return data;
         }
 
-        setUser(null);
+        // setUser(null);
 
         if (data.error !== "Nincs cookie!") {
             setErrorUser(data.error);
