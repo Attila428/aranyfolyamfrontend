@@ -8,7 +8,7 @@ export default function Product({ allProduct, onAddToCart, isLoggedIn }) {
                     className="container d-flex justify-content-center col-12 col-md-6 col-lg-4 col-xl-3"
                     key={product.product_id}
                 >
-                    <div className="card bg-dark text-white rounded rounded-4">
+                    <div className="card bg-dark text-white rounded rounded-4 w-100">
                         <div className="p-3">
                             <img
                                 src={product.product_image}
@@ -34,14 +34,19 @@ export default function Product({ allProduct, onAddToCart, isLoggedIn }) {
                                     <span className="text-danger fw-bold fs-5"> Ft</span>
                                 </div>
 
-                                {isLoggedIn && (
-                                    <div>
-                                        <Button
+                                {isLoggedIn && product && (
+                                    product.product_stock > 0 ? (
+                                         <Button
                                             buttonClass={"btn btn-danger fw-bold fs-6"}
                                             content={"Kosárba"}
                                             onClick={() => onAddToCart(product)}
                                         />
-                                    </div>
+                                    ) : (
+                                         <Button
+                                            buttonClass={"btn btn-dark fw-bold fs-6"}
+                                            content={"Nincs készleten"}
+                                        />
+                                    )
                                 )}
                             </div>
                         </div>

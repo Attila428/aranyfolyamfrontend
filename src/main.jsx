@@ -14,12 +14,12 @@ import Profil from './pages/Profil';
 import UserOrder from './pages/UserOrders';
 import { AuthProvider } from './context/AuthContext';
 import AdminOrders from './pages/AdminOrders'
-
+import { HashRouter } from "react-router-dom";
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
    <AuthProvider>
-    <BrowserRouter>
+    <HashRouter>
     <Routes>
         <Route path='/register' element={<Register />}/>
         <Route path='/login' element={<Login />}/>
@@ -30,7 +30,7 @@ createRoot(document.getElementById('root')).render(
         <Route path='/rendeleseim' element={<UserOrder/>}/>
         <Route path="/adminorders" element={<AdminOrders />} />
       </Routes>
-   </BrowserRouter>
+   </HashRouter>
    </AuthProvider>
   </StrictMode>
 )

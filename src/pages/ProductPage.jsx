@@ -16,6 +16,7 @@ export default function Products() {
     const [orderLoading, setOrderLoading] = useState(false);
     const [orderError, setOrderError] = useState(null);
     const [orderSuccess, setOrderSuccess] = useState(null);
+    const [searchProduct, setSearchProduct] = useState("");
 
     const navigate = useNavigate();
     const isLoggedIn = !!user;
@@ -63,11 +64,19 @@ export default function Products() {
             );
 
             if (existingProduct) {
+                if (existingProduct.quantity >= product.product_stock) {
+                    return prevCart;
+                }
+
                 return prevCart.map((item) =>
                     item.product_id === product.product_id
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 );
+            }
+
+            if (product.product_stock <= 0) {
+                return prevCart;
             }
 
             return [...prevCart, { ...product, quantity: 1 }];
@@ -83,23 +92,28 @@ export default function Products() {
         setCart((prevCart) =>
             prevCart.map((item) =>
                 item.product_id === productId
-                    ? { ...item, quantity: item.quantity + 1 }
+                    ? item.quantity < item.product_stock
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
                     : item
             )
         );
     }
 
     function decreaseQuantity(productId) {
-        setCart((prevCart) =>
-            prevCart
-                .map((item) =>
-                    item.product_id === productId
-                        ? { ...item, quantity: item.quantity - 1 }
-                        : item
-                )
-                .filter((item) => item.quantity > 0)
-        );
-    }
+    setCart((prevCart) =>
+        prevCart
+            .map((item) => {
+                if (item.product_id !== productId) return item;
+
+                return {
+                    ...item,
+                    quantity: item.quantity - 1
+                };
+            })
+            .filter((item) => item.quantity > 0)
+    );
+}
 
     function removeFromCart(productId) {
         setCart((prevCart) =>
@@ -122,6 +136,10 @@ export default function Products() {
         const price = Number(item.product_price) || 0;
         return sum + price * item.quantity;
     }, 0);
+
+    const filteredProducts = allProduct.filter((product) =>
+        product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
+    );
 
     async function finalizeOrder() {
         if (!user || !user.user_id) {
@@ -170,13 +188,12 @@ export default function Products() {
             <NavBar user={user} onLogout={handleLogout} />
 
             <div
-                className="container-fluid min-vh-100 d-flex align-items-center py-4"
+                className="container-fluid min-vh-100 d-flex py-4"
                 style={{ background: "linear-gradient(90deg, #000000, #1a0000)" }}
             >
                 <div className="container">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h2 className="text-white m-0">Termékek</h2>
-
                         {isLoggedIn && (
                             <button
                                 className="btn btn-danger"
@@ -186,10 +203,18 @@ export default function Products() {
                             </button>
                         )}
                     </div>
-
+                    <div className="my-4">
+                        <input
+                            type="text"
+                            className="form-control mb-3 meno fw-bold border-danger"
+                            placeholder="Mit keresel?"
+                            value={searchProduct}
+                            onChange={(e) => setSearchProduct(e.target.value)}
+                        />
+                    </div>
                     <div className="row row-gap-4">
                         <Product
-                            allProduct={allProduct}
+                            allProduct={filteredProducts}
                             onAddToCart={onAddToCart}
                             isLoggedIn={isLoggedIn}
                         />
@@ -264,6 +289,7 @@ export default function Products() {
                                                             onClick={() =>
                                                                 increaseQuantity(item.product_id)
                                                             }
+                                                            disabled={item.quantity >= item.product_stock}
                                                         >
                                                             +
                                                         </button>
