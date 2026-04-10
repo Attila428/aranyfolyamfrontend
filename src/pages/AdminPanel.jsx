@@ -4,12 +4,13 @@ import NavBar from "../components/NavBar";
 import User from "../components/User";
 import { getUsers } from "../api/api";
 import { useAuth } from "../context/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function AdminPanel() {
     const { user, loading, errorUser, onLogout } = useAuth();
     const [users, setUsers] = useState([]);
     const [usersError, setUsersError] = useState(null);
+    const nav = useNavigate();
 
     useEffect(() => {
         async function fetchUsers() {
@@ -21,6 +22,7 @@ export default function AdminPanel() {
                 return;
             }
 
+            setUsersError(null);
             setUsers(data || []);
         }
 
@@ -33,46 +35,68 @@ export default function AdminPanel() {
         return <p className="text-center mt-5">Töltés...</p>;
     }
 
-    if (!user || user.user_role!="admin") {
+    if (!loading && (!user || user.user_role !== "admin")) {
         return <Navigate to="/" replace />;
     }
 
     return (
         <>
             <NavBar user={user} onLogout={onLogout} />
+
             <div
-                className="container-fluid d-flex flex-column align-items-center min-vh-100 py-4"
+                className="container-fluid min-vh-100 py-3 py-md-4 px-2 px-md-3 overflow-x-hidden"
                 style={{ background: "linear-gradient(90deg, #000000, #1a0000)" }}
             >
-                {errorUser && (
-                    <div className="alert alert-danger w-75 text-center">
-                        {errorUser}
-                    </div>
-                )}
+                <div className="container">
+                    <div className="mx-auto" style={{ maxWidth: "1100px" }}>
+                        <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3 mb-4">
+                            <h1 className="text-white text-center text-md-start mb-0">
+                                Admin panel
+                            </h1>
 
-                {usersError && (
-                    <div className="alert alert-danger w-75 text-center">
-                        {usersError}
-                    </div>
-                )}
+                            <button
+                                className="btn btn-warning fw-bold px-4 py-2 align-self-center align-self-md-auto"
+                                onClick={() => nav("/adminorders")}
+                            >
+                                Összes rendelés kezelése
+                            </button>
+                        </div>
 
-                {users.length === 0 && !usersError ? (
-                    <div className="border border-2 rounded-4 py-2 px-3 bg-danger border-danger">
-                        <span className="text-white fw-bold fs-5">
-                            Nem található felhasználó!
-                        </span>
+                        {errorUser && (
+                            <div className="alert alert-danger text-center w-100 mb-3 rounded-4">
+                                {errorUser}
+                            </div>
+                        )}
+
+                        {usersError && (
+                            <div className="alert alert-danger text-center w-100 mb-3 rounded-4">
+                                {usersError}
+                            </div>
+                        )}
+
+                        {users.length === 0 && !usersError ? (
+                            <div className="border border-2 rounded-4 py-3 px-3 bg-danger border-danger text-center shadow-sm">
+                                <span className="text-white fw-bold fs-6">
+                                    Nem található felhasználó!
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="d-flex flex-column gap-3">
+                                {users.map((u) => (
+                                    <div key={u.user_id} className="w-100">
+                                        <User
+                                            user={u}
+                                            setUsers={setUsers}
+                                            users={users}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    users.map((u) => (
-                        <User
-                            key={u.user_id}
-                            user={u}
-                            setUsers={setUsers}
-                            users={users}
-                        />
-                    ))
-                )}
+                </div>
             </div>
+
             <Footer />
         </>
     );

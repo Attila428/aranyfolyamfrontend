@@ -83,3 +83,67 @@ export async function createOrder(user_id, items) {
         return { error: "Nem sikerült kapcsolódni a szerverhez." };
     }
 }
+
+export async function getUserOrders(user_id) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/orders/${user_id}`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült lekérni a rendeléseket." };
+        }
+
+        return data;
+    } catch (err) {
+        console.error(err);
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
+    }
+}
+
+export async function getAllOrders() {
+    try {
+        const res = await fetch(`${BACKEND_URL}/orders`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült lekérni a rendeléseket." };
+        }
+
+        return Array.isArray(data) ? data : data.result || [];
+    } catch (err) {
+        console.error(err);
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
+    }
+}
+
+export async function updateOrderStatus(order_id, status) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/orders/${order_id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ status }),
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült frissíteni a rendelés státuszát." };
+        }
+
+        return data;
+    } catch (err) {
+        console.error(err);
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
+    }
+}

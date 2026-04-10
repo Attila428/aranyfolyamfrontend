@@ -11,8 +11,9 @@ import AboutUs from './pages/AboutUsPage'
 import ProductPage from './pages/ProductPage';
 import AdminPanel from './pages/AdminPanel';
 import Profil from './pages/Profil';
+import UserOrder from './pages/UserOrders';
 import { AuthProvider } from './context/AuthContext';
-
+import AdminOrders from './pages/AdminOrders'
 
 
 createRoot(document.getElementById('root')).render(
@@ -26,6 +27,8 @@ createRoot(document.getElementById('root')).render(
         <Route path='/' element={<ProductPage/>}/>
         <Route path='/AdminPanel' element={<AdminPanel/>}/>
         <Route path='/profil' element={<Profil/>}/>
+        <Route path='/rendeleseim' element={<UserOrder/>}/>
+        <Route path="/adminorders" element={<AdminOrders />} />
       </Routes>
    </BrowserRouter>
    </AuthProvider>
