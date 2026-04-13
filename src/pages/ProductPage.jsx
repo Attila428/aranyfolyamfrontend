@@ -13,10 +13,37 @@ export default function Products() {
     const [cart, setCart] = useState([]);
     const [showCart, setShowCart] = useState(false);
     const [checkoutStep, setCheckoutStep] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
+
     const [orderLoading, setOrderLoading] = useState(false);
     const [orderError, setOrderError] = useState(null);
     const [orderSuccess, setOrderSuccess] = useState(null);
+
     const [searchProduct, setSearchProduct] = useState("");
+    const [minAvailablePrice, setMinAvailablePrice] = useState(0);
+    const [maxAvailablePrice, setMaxAvailablePrice] = useState(100000);
+    const [priceRange, setPriceRange] = useState([0, 100000]);
+
+    const [paymentMethod, setPaymentMethod] = useState("cash");
+    const [showCardModal, setShowCardModal] = useState(false);
+    const [showBillingModal, setShowBillingModal] = useState(false);
+
+    const [cardData, setCardData] = useState({
+        cardName: "",
+        cardNumber: "",
+        expiry: "",
+        cvc: ""
+    });
+
+    const [billingData, setBillingData] = useState({
+        billingName: "",
+        billingEmail: "",
+        billingPhone: "",
+        billingZip: "",
+        billingCity: "",
+        billingAddress: "",
+        billingNote: ""
+    });
 
     const navigate = useNavigate();
     const isLoggedIn = !!user;
@@ -26,7 +53,18 @@ export default function Products() {
             const data = await getAllProduct();
 
             if (!data?.error) {
-                setAllProduct(data || []);
+                const products = data || [];
+                setAllProduct(products);
+
+                if (products.length > 0) {
+                    const prices = products.map((p) => Number(p.product_price) || 0);
+                    const min = Math.min(...prices);
+                    const max = Math.max(...prices);
+
+                    setMinAvailablePrice(min);
+                    setMaxAvailablePrice(max);
+                    setPriceRange([min, max]);
+                }
             } else {
                 console.error(data?.error);
             }
@@ -53,6 +91,28 @@ export default function Products() {
     async function handleLogout() {
         await onLogout();
         navigate("/");
+    }
+
+    function handleMinChange(value) {
+        const safeValue = Number.isNaN(value) ? minAvailablePrice : value;
+        const clampedValue = Math.max(
+            minAvailablePrice,
+            Math.min(safeValue, priceRange[1])
+        );
+        setPriceRange([clampedValue, priceRange[1]]);
+    }
+
+    function handleMaxChange(value) {
+        const safeValue = Number.isNaN(value) ? maxAvailablePrice : value;
+        const clampedValue = Math.min(
+            maxAvailablePrice,
+            Math.max(safeValue, priceRange[0])
+        );
+        setPriceRange([priceRange[0], clampedValue]);
+    }
+
+    function resetPriceFilter() {
+        setPriceRange([minAvailablePrice, maxAvailablePrice]);
     }
 
     function onAddToCart(product) {
@@ -101,19 +161,19 @@ export default function Products() {
     }
 
     function decreaseQuantity(productId) {
-    setCart((prevCart) =>
-        prevCart
-            .map((item) => {
-                if (item.product_id !== productId) return item;
+        setCart((prevCart) =>
+            prevCart
+                .map((item) => {
+                    if (item.product_id !== productId) return item;
 
-                return {
-                    ...item,
-                    quantity: item.quantity - 1
-                };
-            })
-            .filter((item) => item.quantity > 0)
-    );
-}
+                    return {
+                        ...item,
+                        quantity: item.quantity - 1
+                    };
+                })
+                .filter((item) => item.quantity > 0)
+        );
+    }
 
     function removeFromCart(productId) {
         setCart((prevCart) =>
@@ -128,6 +188,24 @@ export default function Products() {
         setCheckoutStep(false);
         setOrderError(null);
         setOrderSuccess(null);
+        setPaymentMethod("cash");
+        setShowCardModal(false);
+        setShowBillingModal(false);
+        setCardData({
+            cardName: "",
+            cardNumber: "",
+            expiry: "",
+            cvc: ""
+        });
+        setBillingData({
+            billingName: "",
+            billingEmail: "",
+            billingPhone: "",
+            billingZip: "",
+            billingCity: "",
+            billingAddress: "",
+            billingNote: ""
+        });
     }
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -137,9 +215,15 @@ export default function Products() {
         return sum + price * item.quantity;
     }, 0);
 
-    const filteredProducts = allProduct.filter((product) =>
-        product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
-    );
+    const filteredProducts = allProduct.filter((product) => {
+        const price = Number(product.product_price) || 0;
+
+        return (
+            product.product_name.toLowerCase().includes(searchProduct.toLowerCase()) &&
+            price >= priceRange[0] &&
+            price <= priceRange[1]
+        );
+    });
 
     async function finalizeOrder() {
         if (!user || !user.user_id) {
@@ -177,7 +261,56 @@ export default function Products() {
         localStorage.removeItem("cart");
         setOrderLoading(false);
         setCheckoutStep(false);
+        setShowCardModal(false);
+        setShowBillingModal(false);
+        setPaymentMethod("cash");
+        setCardData({
+            cardName: "",
+            cardNumber: "",
+            expiry: "",
+            cvc: ""
+        });
+        setBillingData({
+            billingName: "",
+            billingEmail: "",
+            billingPhone: "",
+            billingZip: "",
+            billingCity: "",
+            billingAddress: "",
+            billingNote: ""
+        });
     }
+
+    function handleCheckoutSubmit() {
+        setOrderError(null);
+
+        if (paymentMethod === "card") {
+            setShowCardModal(true);
+            return;
+        }
+
+        setShowBillingModal(true);
+    }
+
+    function handleCardContinue() {
+        setShowCardModal(false);
+        setShowBillingModal(true);
+    }
+
+    const rangePercentLeft =
+        maxAvailablePrice === minAvailablePrice
+            ? 0
+            : ((priceRange[0] - minAvailablePrice) /
+                  (maxAvailablePrice - minAvailablePrice)) *
+              100;
+
+    const rangePercentRight =
+        maxAvailablePrice === minAvailablePrice
+            ? 0
+            : 100 -
+              ((priceRange[1] - minAvailablePrice) /
+                  (maxAvailablePrice - minAvailablePrice)) *
+                  100;
 
     if (loading) {
         return <p className="text-center mt-5">Töltés...</p>;
@@ -188,36 +321,155 @@ export default function Products() {
             <NavBar user={user} onLogout={handleLogout} />
 
             <div
-                className="container-fluid min-vh-100 d-flex py-4"
+                className="container-fluid min-vh-100 py-4"
                 style={{ background: "linear-gradient(90deg, #000000, #1a0000)" }}
             >
                 <div className="container">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                         <h2 className="text-white m-0">Termékek</h2>
-                        {isLoggedIn && (
+
+                        <div className="d-flex gap-2 flex-wrap">
                             <button
-                                className="btn btn-danger"
-                                onClick={() => setShowCart(true)}
+                                className="btn btn-outline-light d-lg-none"
+                                onClick={() => setShowFilter((prev) => !prev)}
                             >
-                                Kosár ({totalItems})
+                                {showFilter ? "Szűrő bezárása" : "Szűrő megnyitása"}
                             </button>
-                        )}
+
+                            {isLoggedIn && (
+                                <button
+                                    className="btn btn-danger"
+                                    onClick={() => setShowCart(true)}
+                                >
+                                    Kosár ({totalItems})
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    <div className="my-4">
-                        <input
-                            type="text"
-                            className="form-control mb-3 meno fw-bold border-danger"
-                            placeholder="Mit keresel?"
-                            value={searchProduct}
-                            onChange={(e) => setSearchProduct(e.target.value)}
-                        />
-                    </div>
-                    <div className="row row-gap-4">
-                        <Product
-                            allProduct={filteredProducts}
-                            onAddToCart={onAddToCart}
-                            isLoggedIn={isLoggedIn}
-                        />
+
+                    <div className="row g-4 align-items-start">
+                        <div
+                            className={`col-12 col-lg-3 ${
+                                showFilter ? "d-block" : "d-none d-lg-block"
+                            }`}
+                        >
+                            <div className="bg-dark text-white p-3 rounded-4 border border-danger product-filter-box">
+                                <h4 className="mb-3">Szűrők</h4>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">
+                                        Keresés
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control fw-bold border-danger"
+                                        placeholder="Mit keresel?"
+                                        value={searchProduct}
+                                        onChange={(e) => setSearchProduct(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">
+                                        Minimum ár
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        min={minAvailablePrice}
+                                        max={priceRange[1]}
+                                        value={priceRange[0]}
+                                        onChange={(e) =>
+                                            handleMinChange(Number(e.target.value))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">
+                                        Maximum ár
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        min={priceRange[0]}
+                                        max={maxAvailablePrice}
+                                        value={priceRange[1]}
+                                        onChange={(e) =>
+                                            handleMaxChange(Number(e.target.value))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold d-block">
+                                        Ár tartomány
+                                    </label>
+
+                                    <div className="price-range-wrapper">
+                                        <div className="price-range-base"></div>
+
+                                        <div
+                                            className="price-range-active"
+                                            style={{
+                                                left: `${rangePercentLeft}%`,
+                                                right: `${rangePercentRight}%`
+                                            }}
+                                        ></div>
+
+                                        <input
+                                            type="range"
+                                            className="price-range-input"
+                                            min={minAvailablePrice}
+                                            max={maxAvailablePrice}
+                                            value={priceRange[0]}
+                                            onChange={(e) =>
+                                                handleMinChange(Number(e.target.value))
+                                            }
+                                        />
+
+                                        <input
+                                            type="range"
+                                            className="price-range-input"
+                                            min={minAvailablePrice}
+                                            max={maxAvailablePrice}
+                                            value={priceRange[1]}
+                                            onChange={(e) =>
+                                                handleMaxChange(Number(e.target.value))
+                                            }
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mb-3 text-center fw-bold">
+                                    {priceRange[0].toLocaleString("hu-HU")} Ft -{" "}
+                                    {priceRange[1].toLocaleString("hu-HU")} Ft
+                                </div>
+
+                                <button
+                                    className="btn btn-outline-light w-100"
+                                    onClick={resetPriceFilter}
+                                >
+                                    Szűrő visszaállítása
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="col-12 col-lg-9">
+                            {filteredProducts.length === 0 ? (
+                                <div className="bg-dark text-white border border-danger rounded-4 p-4 text-center">
+                                    Nincs a szűrésnek megfelelő termék.
+                                </div>
+                            ) : (
+                                <div className="row row-gap-4">
+                                    <Product
+                                        allProduct={filteredProducts}
+                                        onAddToCart={onAddToCart}
+                                        isLoggedIn={isLoggedIn}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -256,7 +508,7 @@ export default function Products() {
                                             {cart.map((item) => (
                                                 <div
                                                     key={item.product_id}
-                                                    className="border rounded p-3 mb-3 d-flex justify-content-between align-items-center"
+                                                    className="border rounded p-3 mb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3"
                                                 >
                                                     <div>
                                                         <h5 className="mb-1">{item.product_name}</h5>
@@ -274,7 +526,7 @@ export default function Products() {
                                                         </p>
                                                     </div>
 
-                                                    <div className="d-flex gap-2">
+                                                    <div className="d-flex gap-2 flex-wrap">
                                                         <button
                                                             className="btn btn-outline-dark"
                                                             onClick={() =>
@@ -308,10 +560,14 @@ export default function Products() {
 
                                             <h4>Összesen: {totalPrice} Ft</h4>
 
-                                            <div className="d-flex gap-2 mt-3">
+                                            <div className="d-flex gap-2 mt-3 flex-wrap">
                                                 <button
                                                     className="btn btn-warning"
-                                                    onClick={() => setCheckoutStep(true)}
+                                                    onClick={() => {
+                                                        setCheckoutStep(true);
+                                                        setOrderError(null);
+                                                        setOrderSuccess(null);
+                                                    }}
                                                 >
                                                     Tovább
                                                 </button>
@@ -354,6 +610,50 @@ export default function Products() {
 
                                     <h4 className="mt-3">Végösszeg: {totalPrice} Ft</h4>
 
+                                    <div className="mt-4">
+                                        <label className="form-label fw-bold">
+                                            Fizetési mód
+                                        </label>
+
+                                        <div className="d-flex flex-column gap-2">
+                                            <div className="form-check">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="paymentMethod"
+                                                    id="cashPayment"
+                                                    value="cash"
+                                                    checked={paymentMethod === "cash"}
+                                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                                />
+                                                <label
+                                                    className="form-check-label"
+                                                    htmlFor="cashPayment"
+                                                >
+                                                    Készpénz
+                                                </label>
+                                            </div>
+
+                                            <div className="form-check">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="paymentMethod"
+                                                    id="cardPayment"
+                                                    value="card"
+                                                    checked={paymentMethod === "card"}
+                                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                                />
+                                                <label
+                                                    className="form-check-label"
+                                                    htmlFor="cardPayment"
+                                                >
+                                                    Bankkártya
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {orderError && (
                                         <div className="alert alert-danger mt-3">
                                             {orderError}
@@ -368,15 +668,328 @@ export default function Products() {
 
                                     <button
                                         className="btn btn-success mt-3"
-                                        onClick={finalizeOrder}
+                                        onClick={handleCheckoutSubmit}
                                         disabled={orderLoading}
                                     >
-                                        {orderLoading
-                                            ? "Küldés..."
-                                            : "Rendelés véglegesítése"}
+                                        {paymentMethod === "card"
+                                            ? "Tovább a kártyaadatokhoz"
+                                            : "Tovább a számlázási adatokhoz"}
                                     </button>
                                 </>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showCardModal && (
+                <div
+                    className="position-fixed top-0 start-0 w-100 h-100"
+                    style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 1060 }}
+                >
+                    <div className="container h-100 d-flex justify-content-center align-items-center">
+                        <div
+                            className="bg-white p-4 rounded shadow"
+                            style={{
+                                width: "100%",
+                                maxWidth: "520px",
+                                maxHeight: "85vh",
+                                overflowY: "auto",
+                            }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h3 className="m-0">Kártyás fizetés</h3>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowCardModal(false)}
+                                >
+                                    Vissza
+                                </button>
+                            </div>
+
+                            <p className="text-muted">
+                                Add meg a kártyaadatokat. Ezeket a felület csak megjeleníti,
+                                külön nem dolgozza fel.
+                            </p>
+
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">
+                                    Kártyatulajdonos neve
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={cardData.cardName}
+                                    onChange={(e) =>
+                                        setCardData((prev) => ({
+                                            ...prev,
+                                            cardName: e.target.value
+                                        }))
+                                    }
+                                />
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">
+                                    Kártyaszám
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="1234 5678 9012 3456"
+                                    value={cardData.cardNumber}
+                                    onChange={(e) =>
+                                        setCardData((prev) => ({
+                                            ...prev,
+                                            cardNumber: e.target.value
+                                        }))
+                                    }
+                                />
+                            </div>
+
+                            <div className="row g-3">
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Lejárat
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="MM/ÉÉ"
+                                        value={cardData.expiry}
+                                        onChange={(e) =>
+                                            setCardData((prev) => ({
+                                                ...prev,
+                                                expiry: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        CVC
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="123"
+                                        value={cardData.cvc}
+                                        onChange={(e) =>
+                                            setCardData((prev) => ({
+                                                ...prev,
+                                                cvc: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {orderError && (
+                                <div className="alert alert-danger mt-3">
+                                    {orderError}
+                                </div>
+                            )}
+
+                            <div className="mt-4 d-flex gap-2 flex-column flex-sm-row">
+                                <button
+                                    className="btn btn-secondary w-100"
+                                    onClick={() => setShowCardModal(false)}
+                                >
+                                    Mégse
+                                </button>
+
+                                <button
+                                    className="btn btn-success w-100"
+                                    onClick={handleCardContinue}
+                                >
+                                    Tovább a számlázási adatokhoz
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showBillingModal && (
+                <div
+                    className="position-fixed top-0 start-0 w-100 h-100"
+                    style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 1070 }}
+                >
+                    <div className="container h-100 d-flex justify-content-center align-items-center">
+                        <div
+                            className="bg-white p-4 rounded shadow"
+                            style={{
+                                width: "100%",
+                                maxWidth: "650px",
+                                maxHeight: "85vh",
+                                overflowY: "auto",
+                            }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h3 className="m-0">Számlázási adatok</h3>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowBillingModal(false)}
+                                >
+                                    Vissza
+                                </button>
+                            </div>
+
+                            <p className="text-muted">
+                                Add meg a számlázási adatokat. Ezeket a felület csak megjeleníti,
+                                külön nem kerülnek feldolgozásra.
+                            </p>
+
+                            <div className="row g-3">
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Név / Cégnév
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={billingData.billingName}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingName: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Email cím
+                                    </label>
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        value={billingData.billingEmail}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingEmail: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Telefonszám
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={billingData.billingPhone}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingPhone: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Irányítószám
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={billingData.billingZip}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingZip: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Város
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={billingData.billingCity}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingCity: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Cím
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={billingData.billingAddress}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingAddress: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+
+                                <div className="col-12">
+                                    <label className="form-label fw-bold">
+                                        Megjegyzés
+                                    </label>
+                                    <textarea
+                                        className="form-control"
+                                        rows="3"
+                                        value={billingData.billingNote}
+                                        onChange={(e) =>
+                                            setBillingData((prev) => ({
+                                                ...prev,
+                                                billingNote: e.target.value
+                                            }))
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {orderError && (
+                                <div className="alert alert-danger mt-3">
+                                    {orderError}
+                                </div>
+                            )}
+
+                            {orderSuccess && (
+                                <div className="alert alert-success mt-3">
+                                    {orderSuccess}
+                                </div>
+                            )}
+
+                            <div className="mt-4 d-flex gap-2 flex-column flex-sm-row">
+                                <button
+                                    className="btn btn-secondary w-100"
+                                    onClick={() => setShowBillingModal(false)}
+                                >
+                                    Mégse
+                                </button>
+
+                                <button
+                                    className="btn btn-success w-100"
+                                    onClick={finalizeOrder}
+                                    disabled={orderLoading}
+                                >
+                                    {orderLoading ? "Küldés..." : "Rendelés leadása"}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

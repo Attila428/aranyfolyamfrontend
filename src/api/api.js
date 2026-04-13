@@ -147,3 +147,71 @@ export async function updateOrderStatus(order_id, status) {
         return { error: "Nem sikerült kapcsolódni a szerverhez." };
     }
 }
+
+export async function createProduct(product) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/product/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(product),
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült létrehozni a terméket." };
+        }
+
+        return data;
+    } catch (err) {
+        console.error(err);
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
+    }
+}
+
+export async function updateProduct(product) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/product/update`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(product),
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült módosítani a terméket." };
+        }
+
+        return data;
+    } catch (err) {
+        console.error(err);
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
+    }
+}
+
+export async function deleteProduct(product_id) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/product/del/${product_id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült törölni a terméket." };
+        }
+
+        return data;
+    } catch (err) {
+        console.error(err);
+        return { error: "Nem sikerült kapcsolódni a szerverhez." };
+    }
+}
