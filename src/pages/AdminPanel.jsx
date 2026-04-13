@@ -54,12 +54,21 @@ export default function AdminPanel() {
                                 Admin panel
                             </h1>
 
-                            <button
-                                className="btn btn-warning fw-bold px-4 py-2 align-self-center align-self-md-auto"
-                                onClick={() => nav("/adminorders")}
-                            >
-                                Összes rendelés kezelése
-                            </button>
+                            <div className="d-flex flex-column flex-md-row gap-2">
+                                <button
+                                    className="btn btn-warning fw-bold px-4 py-2"
+                                    onClick={() => nav("/adminorders")}
+                                >
+                                    Rendelések kezelése
+                                </button>
+
+                                <button
+                                    className="btn btn-success fw-bold px-4 py-2"
+                                    onClick={() => nav("/adminproducts")}
+                                >
+                                    Termékek kezelése
+                                </button>
+                            </div>
                         </div>
 
                         {errorUser && (
