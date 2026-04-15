@@ -2,27 +2,55 @@ import { useState } from "react";
 import { editUser } from "../api/api";
 
 export default function EditUserByAdmin({ user, onClose, setUsers, users }) {
-  const [username, setUsername] = useState(user.user_username);
-  const [email, setEmail] = useState(user.user_email);
-  const [role, setRole] = useState(user.user_role);
+  const [username, setUsername] = useState(user.user_username || "");
+  const [email, setEmail] = useState(user.user_email || "");
+  const [role, setRole] = useState(user.user_role || "user");
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
 
   const userDataSubmit = async () => {
-    try {
-      const updatedData = {
-        user_username: username,
-        user_email: email,
-        user_role: role
-      };
+    setError("");
 
-      await editUser(user.user_id, updatedData.user_username, updatedData.user_email, updatedData.user_role);
-      console.log(updatedData);
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedUsername || !trimmedEmail) {
+      setError("Nem lehet üres mezőt menteni!");
+      return;
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setError("Adj meg érvényes email címet!");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await editUser(
+        user.user_id,
+        trimmedUsername,
+        trimmedEmail,
+        role
+      );
+
+      if (res?.error) {
+        setError(res.error);
+        setLoading(false);
+        return;
+      }
 
       const ujLista = users.map((u) => {
         if (u.user_id === user.user_id) {
           return {
-            user_id: u.user_id,
-            user_username: username,
-            user_email: email,
+            ...u,
+            user_username: trimmedUsername,
+            user_email: trimmedEmail,
             user_role: role
           };
         } else {
@@ -31,11 +59,12 @@ export default function EditUserByAdmin({ user, onClose, setUsers, users }) {
       });
 
       setUsers(ujLista);
-
       onClose();
     } catch (err) {
-      console.error("Hiba a mentés során:", err);
+      setError("Hiba a mentés során.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -43,7 +72,7 @@ export default function EditUserByAdmin({ user, onClose, setUsers, users }) {
       <div className="modal show d-block" style={{ zIndex: 1050 }}>
         <div className="modal-dialog">
           <div className="modal-content bg-danger border border-light rounded">
-            
+
             <div className="modal-header border-light">
               <h5 className="modal-title text-light fw-bold">
                 Felhasználó szerkesztése
@@ -52,6 +81,13 @@ export default function EditUserByAdmin({ user, onClose, setUsers, users }) {
             </div>
 
             <div className="modal-body">
+
+              {error && (
+                <div className="alert alert-danger">
+                  {error}
+                </div>
+              )}
+
               <label className="text-light small">Felhasználónév:</label>
               <input
                 type="text"
@@ -83,8 +119,13 @@ export default function EditUserByAdmin({ user, onClose, setUsers, users }) {
               <button className="btn btn-outline-light" onClick={onClose}>
                 Mégse
               </button>
-              <button className="btn btn-dark" onClick={userDataSubmit}>
-                Mentés
+
+              <button
+                className="btn btn-dark"
+                onClick={userDataSubmit}
+                disabled={loading || !username.trim() || !email.trim()}
+              >
+                {loading ? "Mentés..." : "Mentés"}
               </button>
             </div>
 

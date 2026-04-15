@@ -6,6 +6,16 @@ import { getAllProduct, createOrder } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+
+function getImageSrc(imagePath) {
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+        return imagePath;
+    }
+    return `${BACKEND_URL}${imagePath}`;
+}
+
 export default function Products() {
     const { user, onLogout, loading } = useAuth();
 
@@ -53,7 +63,11 @@ export default function Products() {
             const data = await getAllProduct();
 
             if (!data?.error) {
-                const products = data || [];
+                const products = (data || []).map((product) => ({
+                    ...product,
+                    product_image: getImageSrc(product.product_image)
+                }));
+
                 setAllProduct(products);
 
                 if (products.length > 0) {
@@ -337,10 +351,7 @@ export default function Products() {
                             </button>
 
                             {isLoggedIn && (
-                                <button
-                                    className="btn btn-danger"
-                                    onClick={() => setShowCart(true)}
-                                >
+                                <button className="btn btn-danger" onClick={() => setShowCart(true)}>
                                     Kosár ({totalItems})
                                 </button>
                             )}
@@ -357,9 +368,7 @@ export default function Products() {
                                 <h4 className="mb-3">Szűrők</h4>
 
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">
-                                        Keresés
-                                    </label>
+                                    <label className="form-label fw-bold">Keresés</label>
                                     <input
                                         type="text"
                                         className="form-control fw-bold border-danger"
@@ -370,41 +379,31 @@ export default function Products() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">
-                                        Minimum ár
-                                    </label>
+                                    <label className="form-label fw-bold">Minimum ár</label>
                                     <input
                                         type="number"
                                         className="form-control"
                                         min={minAvailablePrice}
                                         max={priceRange[1]}
                                         value={priceRange[0]}
-                                        onChange={(e) =>
-                                            handleMinChange(Number(e.target.value))
-                                        }
+                                        onChange={(e) => handleMinChange(Number(e.target.value))}
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">
-                                        Maximum ár
-                                    </label>
+                                    <label className="form-label fw-bold">Maximum ár</label>
                                     <input
                                         type="number"
                                         className="form-control"
                                         min={priceRange[0]}
                                         max={maxAvailablePrice}
                                         value={priceRange[1]}
-                                        onChange={(e) =>
-                                            handleMaxChange(Number(e.target.value))
-                                        }
+                                        onChange={(e) => handleMaxChange(Number(e.target.value))}
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold d-block">
-                                        Ár tartomány
-                                    </label>
+                                    <label className="form-label fw-bold d-block">Ár tartomány</label>
 
                                     <div className="price-range-wrapper">
                                         <div className="price-range-base"></div>
@@ -423,9 +422,7 @@ export default function Products() {
                                             min={minAvailablePrice}
                                             max={maxAvailablePrice}
                                             value={priceRange[0]}
-                                            onChange={(e) =>
-                                                handleMinChange(Number(e.target.value))
-                                            }
+                                            onChange={(e) => handleMinChange(Number(e.target.value))}
                                         />
 
                                         <input
@@ -434,9 +431,7 @@ export default function Products() {
                                             min={minAvailablePrice}
                                             max={maxAvailablePrice}
                                             value={priceRange[1]}
-                                            onChange={(e) =>
-                                                handleMaxChange(Number(e.target.value))
-                                            }
+                                            onChange={(e) => handleMaxChange(Number(e.target.value))}
                                         />
                                     </div>
                                 </div>
@@ -493,10 +488,7 @@ export default function Products() {
                                 <>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                         <h3 className="m-0">Kosár</h3>
-                                        <button
-                                            className="btn btn-secondary"
-                                            onClick={() => setShowCart(false)}
-                                        >
+                                        <button className="btn btn-secondary" onClick={() => setShowCart(false)}>
                                             Bezárás
                                         </button>
                                     </div>
@@ -510,37 +502,41 @@ export default function Products() {
                                                     key={item.product_id}
                                                     className="border rounded p-3 mb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3"
                                                 >
-                                                    <div>
-                                                        <h5 className="mb-1">{item.product_name}</h5>
-                                                        <p className="mb-1">
-                                                            Egységár: {item.product_price} Ft
-                                                        </p>
-                                                        <p className="mb-1">
-                                                            Mennyiség: {item.quantity} db
-                                                        </p>
-                                                        <p className="mb-0 fw-bold">
-                                                            Részösszeg:{" "}
-                                                            {(Number(item.product_price) || 0) *
-                                                                item.quantity}{" "}
-                                                            Ft
-                                                        </p>
+                                                    <div className="d-flex gap-3 align-items-start flex-column flex-sm-row">
+                                                        {item.product_image && (
+                                                            <img
+                                                                src={item.product_image}
+                                                                alt={item.product_name}
+                                                                className="rounded border"
+                                                                style={{
+                                                                    width: "90px",
+                                                                    height: "90px",
+                                                                    objectFit: "cover"
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                        <div>
+                                                            <h5 className="mb-1">{item.product_name}</h5>
+                                                            <p className="mb-1">Egységár: {item.product_price} Ft</p>
+                                                            <p className="mb-1">Mennyiség: {item.quantity} db</p>
+                                                            <p className="mb-0 fw-bold">
+                                                                Részösszeg: {(Number(item.product_price) || 0) * item.quantity} Ft
+                                                            </p>
+                                                        </div>
                                                     </div>
 
                                                     <div className="d-flex gap-2 flex-wrap">
                                                         <button
                                                             className="btn btn-outline-dark"
-                                                            onClick={() =>
-                                                                decreaseQuantity(item.product_id)
-                                                            }
+                                                            onClick={() => decreaseQuantity(item.product_id)}
                                                         >
                                                             -
                                                         </button>
 
                                                         <button
                                                             className="btn btn-outline-dark"
-                                                            onClick={() =>
-                                                                increaseQuantity(item.product_id)
-                                                            }
+                                                            onClick={() => increaseQuantity(item.product_id)}
                                                             disabled={item.quantity >= item.product_stock}
                                                         >
                                                             +
@@ -548,9 +544,7 @@ export default function Products() {
 
                                                         <button
                                                             className="btn btn-outline-danger"
-                                                            onClick={() =>
-                                                                removeFromCart(item.product_id)
-                                                            }
+                                                            onClick={() => removeFromCart(item.product_id)}
                                                         >
                                                             Törlés
                                                         </button>
@@ -572,10 +566,7 @@ export default function Products() {
                                                     Tovább
                                                 </button>
 
-                                                <button
-                                                    className="btn btn-danger"
-                                                    onClick={clearCart}
-                                                >
+                                                <button className="btn btn-danger" onClick={clearCart}>
                                                     Kosár ürítése
                                                 </button>
                                             </div>
@@ -586,10 +577,7 @@ export default function Products() {
                                 <>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                         <h3 className="m-0">Rendelés véglegesítése</h3>
-                                        <button
-                                            className="btn btn-secondary"
-                                            onClick={() => setCheckoutStep(false)}
-                                        >
+                                        <button className="btn btn-secondary" onClick={() => setCheckoutStep(false)}>
                                             Vissza
                                         </button>
                                     </div>
@@ -597,23 +585,31 @@ export default function Products() {
                                     <p>Kérlek ellenőrizd a rendelésed:</p>
 
                                     {cart.map((item) => (
-                                        <div
-                                            key={item.product_id}
-                                            className="border-bottom py-2"
-                                        >
-                                            {item.product_name} - {item.quantity} db -{" "}
-                                            {(Number(item.product_price) || 0) *
-                                                item.quantity}{" "}
-                                            Ft
+                                        <div key={item.product_id} className="border-bottom py-2 d-flex gap-3 align-items-center">
+                                            {item.product_image && (
+                                                <img
+                                                    src={item.product_image}
+                                                    alt={item.product_name}
+                                                    className="rounded border"
+                                                    style={{
+                                                        width: "70px",
+                                                        height: "70px",
+                                                        objectFit: "cover"
+                                                    }}
+                                                />
+                                            )}
+
+                                            <div>
+                                                {item.product_name} - {item.quantity} db -{" "}
+                                                {(Number(item.product_price) || 0) * item.quantity} Ft
+                                            </div>
                                         </div>
                                     ))}
 
                                     <h4 className="mt-3">Végösszeg: {totalPrice} Ft</h4>
 
                                     <div className="mt-4">
-                                        <label className="form-label fw-bold">
-                                            Fizetési mód
-                                        </label>
+                                        <label className="form-label fw-bold">Fizetési mód</label>
 
                                         <div className="d-flex flex-column gap-2">
                                             <div className="form-check">
@@ -626,10 +622,7 @@ export default function Products() {
                                                     checked={paymentMethod === "cash"}
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                 />
-                                                <label
-                                                    className="form-check-label"
-                                                    htmlFor="cashPayment"
-                                                >
+                                                <label className="form-check-label" htmlFor="cashPayment">
                                                     Készpénz
                                                 </label>
                                             </div>
@@ -644,27 +637,15 @@ export default function Products() {
                                                     checked={paymentMethod === "card"}
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                 />
-                                                <label
-                                                    className="form-check-label"
-                                                    htmlFor="cardPayment"
-                                                >
+                                                <label className="form-check-label" htmlFor="cardPayment">
                                                     Bankkártya
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {orderError && (
-                                        <div className="alert alert-danger mt-3">
-                                            {orderError}
-                                        </div>
-                                    )}
-
-                                    {orderSuccess && (
-                                        <div className="alert alert-success mt-3">
-                                            {orderSuccess}
-                                        </div>
-                                    )}
+                                    {orderError && <div className="alert alert-danger mt-3">{orderError}</div>}
+                                    {orderSuccess && <div className="alert alert-success mt-3">{orderSuccess}</div>}
 
                                     <button
                                         className="btn btn-success mt-3"
@@ -699,10 +680,7 @@ export default function Products() {
                         >
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <h3 className="m-0">Kártyás fizetés</h3>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setShowCardModal(false)}
-                                >
+                                <button className="btn btn-secondary" onClick={() => setShowCardModal(false)}>
                                     Vissza
                                 </button>
                             </div>
@@ -713,9 +691,7 @@ export default function Products() {
                             </p>
 
                             <div className="mb-3">
-                                <label className="form-label fw-bold">
-                                    Kártyatulajdonos neve
-                                </label>
+                                <label className="form-label fw-bold">Kártyatulajdonos neve</label>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -730,9 +706,7 @@ export default function Products() {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label fw-bold">
-                                    Kártyaszám
-                                </label>
+                                <label className="form-label fw-bold">Kártyaszám</label>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -749,9 +723,7 @@ export default function Products() {
 
                             <div className="row g-3">
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Lejárat
-                                    </label>
+                                    <label className="form-label fw-bold">Lejárat</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -767,9 +739,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        CVC
-                                    </label>
+                                    <label className="form-label fw-bold">CVC</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -785,24 +755,14 @@ export default function Products() {
                                 </div>
                             </div>
 
-                            {orderError && (
-                                <div className="alert alert-danger mt-3">
-                                    {orderError}
-                                </div>
-                            )}
+                            {orderError && <div className="alert alert-danger mt-3">{orderError}</div>}
 
                             <div className="mt-4 d-flex gap-2 flex-column flex-sm-row">
-                                <button
-                                    className="btn btn-secondary w-100"
-                                    onClick={() => setShowCardModal(false)}
-                                >
+                                <button className="btn btn-secondary w-100" onClick={() => setShowCardModal(false)}>
                                     Mégse
                                 </button>
 
-                                <button
-                                    className="btn btn-success w-100"
-                                    onClick={handleCardContinue}
-                                >
+                                <button className="btn btn-success w-100" onClick={handleCardContinue}>
                                     Tovább a számlázási adatokhoz
                                 </button>
                             </div>
@@ -828,10 +788,7 @@ export default function Products() {
                         >
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <h3 className="m-0">Számlázási adatok</h3>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setShowBillingModal(false)}
-                                >
+                                <button className="btn btn-secondary" onClick={() => setShowBillingModal(false)}>
                                     Vissza
                                 </button>
                             </div>
@@ -843,9 +800,7 @@ export default function Products() {
 
                             <div className="row g-3">
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Név / Cégnév
-                                    </label>
+                                    <label className="form-label fw-bold">Név / Cégnév</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -860,9 +815,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Email cím
-                                    </label>
+                                    <label className="form-label fw-bold">Email cím</label>
                                     <input
                                         type="email"
                                         className="form-control"
@@ -877,9 +830,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Telefonszám
-                                    </label>
+                                    <label className="form-label fw-bold">Telefonszám</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -894,9 +845,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Irányítószám
-                                    </label>
+                                    <label className="form-label fw-bold">Irányítószám</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -911,9 +860,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Város
-                                    </label>
+                                    <label className="form-label fw-bold">Város</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -928,9 +875,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-bold">
-                                        Cím
-                                    </label>
+                                    <label className="form-label fw-bold">Cím</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -945,9 +890,7 @@ export default function Products() {
                                 </div>
 
                                 <div className="col-12">
-                                    <label className="form-label fw-bold">
-                                        Megjegyzés
-                                    </label>
+                                    <label className="form-label fw-bold">Megjegyzés</label>
                                     <textarea
                                         className="form-control"
                                         rows="3"
@@ -962,23 +905,11 @@ export default function Products() {
                                 </div>
                             </div>
 
-                            {orderError && (
-                                <div className="alert alert-danger mt-3">
-                                    {orderError}
-                                </div>
-                            )}
-
-                            {orderSuccess && (
-                                <div className="alert alert-success mt-3">
-                                    {orderSuccess}
-                                </div>
-                            )}
+                            {orderError && <div className="alert alert-danger mt-3">{orderError}</div>}
+                            {orderSuccess && <div className="alert alert-success mt-3">{orderSuccess}</div>}
 
                             <div className="mt-4 d-flex gap-2 flex-column flex-sm-row">
-                                <button
-                                    className="btn btn-secondary w-100"
-                                    onClick={() => setShowBillingModal(false)}
-                                >
+                                <button className="btn btn-secondary w-100" onClick={() => setShowBillingModal(false)}>
                                     Mégse
                                 </button>
 

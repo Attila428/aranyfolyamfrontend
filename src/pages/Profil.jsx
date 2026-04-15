@@ -27,12 +27,39 @@ export default function Profil() {
         await onLogout();
     }
 
+    function isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
     const handleSave = async () => {
         setSaveError("");
         setSaveSuccess("");
 
+        const trimmedUsername = username.trim();
+        const trimmedEmail = email.trim();
+
+        if (!trimmedUsername || !trimmedEmail) {
+            setSaveError("A felhasználónév és az email cím nem lehet üres.");
+            return;
+        }
+
+        if (!isValidEmail(trimmedEmail)) {
+            setSaveError("Adj meg érvényes email címet.");
+            return;
+        }
+
+        if ((psw && !pswAgain) || (!psw && pswAgain)) {
+            setSaveError("Ha jelszót módosítasz, mindkét jelszó mezőt ki kell tölteni.");
+            return;
+        }
+
         if (psw !== pswAgain) {
             setSaveError("A két jelszó nem egyezik!");
+            return;
+        }
+
+        if (psw && !psw.trim()) {
+            setSaveError("A jelszó nem lehet üres.");
             return;
         }
 
@@ -40,8 +67,8 @@ export default function Profil() {
 
         try {
             const payload = {
-                username,
-                email,
+                username: trimmedUsername,
+                email: trimmedEmail,
             };
 
             if (psw.trim() !== "") {
@@ -68,12 +95,10 @@ export default function Profil() {
         setSaveLoading(false);
     };
 
-    // ⬇️ loading alatt ne redirecteljen
     if (loading) {
         return <p className="text-center mt-5">Töltés...</p>;
     }
 
-    // ⬇️ HA NINCS USER → AZONNAL DOBJA VISSZA
     if (!user) {
         return <Navigate to="/" replace />;
     }
@@ -160,7 +185,11 @@ export default function Profil() {
                     <button
                         className="btn btn-danger w-100 text-white fw-bold"
                         onClick={handleSave}
-                        disabled={saveLoading}
+                        disabled={
+                            saveLoading ||
+                            !username.trim() ||
+                            !email.trim()
+                        }
                     >
                         {saveLoading ? "Mentés..." : "Mentés"}
                     </button>

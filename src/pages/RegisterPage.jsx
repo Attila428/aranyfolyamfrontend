@@ -16,15 +16,25 @@ export default function Register() {
     const [hiba, setHiba] = useState('')
     const [uzenet, setUzenet] = useState('')
 
-
     const navigate = useNavigate()
+
+    function isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
     async function onRegister() {
         setHiba('')
         setUzenet('')
-        console.log(email, username, psw, psw2)
 
-        if (!email || !username || !psw || !psw2) {
+        const trimmedEmail = email.trim()
+        const trimmedUsername = username.trim()
+
+        if (!trimmedEmail || !trimmedUsername || !psw.trim() || !psw2.trim()) {
             return setHiba('Minden mezőt tölts ki!')
+        }
+
+        if (!isValidEmail(trimmedEmail)) {
+            return setHiba('Adj meg érvényes email címet!')
         }
 
         if (psw !== psw2) {
@@ -32,20 +42,19 @@ export default function Register() {
         }
 
         try {
-            const data = await register(email, username, psw)
-            //console.log(data)
+            const data = await register(trimmedEmail, trimmedUsername, psw)
+
             if (data.error) {
                 setHiba(data.error)
+                return
             }
-            setUzenet(data.message)
 
+            setUzenet(data.message)
         } catch (err) {
-            console.log(err);
             setHiba('Nem sikerült kapcsolódni a backendhez.')
         }
     }
 
-    
     return (
         <>
         <div
@@ -54,7 +63,6 @@ export default function Register() {
                 background: "linear-gradient(135deg, #000000, #1a0000)"
             }}
         >
-
             <div className="row w-100">
 
                 <div className="col-lg-7 d-none d-lg-flex align-items-center justify-content-center">
@@ -149,6 +157,5 @@ export default function Register() {
         </div>
         <Footer/>
         </>
-        
     )
 }

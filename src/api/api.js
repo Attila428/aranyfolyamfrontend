@@ -1,17 +1,30 @@
-const BACKEND_URL = ""
+const BACKEND_URL = "http://localhost:4000";
+
+async function parseJsonSafe(res) {
+    try {
+        return await res.json();
+    } catch {
+        return {};
+    }
+}
 
 export async function getUsers() {
     try {
         const res = await fetch(`${BACKEND_URL}/admin/users`, {
             method: "GET",
             credentials: "include"
-        })
+        });
 
-        const data = await res.json()
-        return data.result
+        const data = await parseJsonSafe(res);
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült lekérni a usereket." };
+        }
+
+        return data.result || [];
     } catch (err) {
-        console.error(err)
-        return { error: "Nem sikerült lekérni a usereket." }
+        console.error(err);
+        return { error: "Nem sikerült lekérni a usereket." };
     }
 }
 
@@ -20,13 +33,18 @@ export async function deleteUser(user_id) {
         const res = await fetch(`${BACKEND_URL}/admin/delete/user/${user_id}`, {
             method: "DELETE",
             credentials: "include"
-        })
+        });
 
-        const data = await res.json()
-        return data.result
+        const data = await parseJsonSafe(res);
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült törölni a usert." };
+        }
+
+        return data.result || data;
     } catch (err) {
-        console.error(err)
-        return { error: "Nem sikerült törölni a usert." }
+        console.error(err);
+        return { error: "Nem sikerült törölni a usert." };
     }
 }
 
@@ -39,12 +57,18 @@ export async function editUser(user_id, user_username, user_email, user_role) {
             },
             body: JSON.stringify({ user_username, user_email, user_role }),
             credentials: "include"
-        })
+        });
 
-        return await res.json()
+        const data = await parseJsonSafe(res);
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült módosítani a usert." };
+        }
+
+        return data;
     } catch (err) {
-        console.error(err)
-        return { error: "Nem sikerült módosítani a usert." }
+        console.error(err);
+        return { error: "Nem sikerült módosítani a usert." };
     }
 }
 
@@ -53,13 +77,18 @@ export async function getAllProduct() {
         const res = await fetch(`${BACKEND_URL}/product/all`, {
             method: "GET",
             credentials: "include"
-        })
+        });
 
-        const data = await res.json()
-        return data.result
+        const data = await parseJsonSafe(res);
+
+        if (!res.ok) {
+            return { error: data.error || "Nem sikerült lekérni a termékeket." };
+        }
+
+        return data.result || [];
     } catch (err) {
-        console.error(err)
-        return { error: "Nem sikerült lekérni a termékeket." }
+        console.error(err);
+        return { error: "Nem sikerült lekérni a termékeket." };
     }
 }
 
@@ -67,19 +96,22 @@ export async function createOrder(user_id, items) {
     try {
         const res = await fetch(`${BACKEND_URL}/orders`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({ user_id, items }),
             credentials: "include"
         });
 
-        const data = await res.json(); // Egyszerűbb JSON kezelés
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
             return { error: data.error || "Sikertelen rendelés." };
         }
 
-        return data; // Ez már a parsed objektum
+        return data;
     } catch (err) {
+        console.error(err);
         return { error: "Nem sikerült kapcsolódni a szerverhez." };
     }
 }
@@ -91,7 +123,7 @@ export async function getUserOrders(user_id) {
             credentials: "include"
         });
 
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
             return { error: data.error || "Nem sikerült lekérni a rendeléseket." };
@@ -111,7 +143,7 @@ export async function getAllOrders() {
             credentials: "include"
         });
 
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
             return { error: data.error || "Nem sikerült lekérni a rendeléseket." };
@@ -135,10 +167,13 @@ export async function updateOrderStatus(order_id, status) {
             credentials: "include"
         });
 
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
-            return { error: data.error || "Nem sikerült frissíteni a rendelés státuszát." };
+            return {
+                error:
+                    data.error || "Nem sikerült frissíteni a rendelés státuszát."
+            };
         }
 
         return data;
@@ -150,16 +185,24 @@ export async function updateOrderStatus(order_id, status) {
 
 export async function createProduct(product) {
     try {
+        const formData = new FormData();
+
+        formData.append("category_id", product.category_id ?? "");
+        formData.append("product_name", product.product_name ?? "");
+        formData.append("product_price", product.product_price ?? "");
+        formData.append("product_stock", product.product_stock ?? "");
+
+        if (product.product_image instanceof File) {
+            formData.append("product_image", product.product_image);
+        }
+
         const res = await fetch(`${BACKEND_URL}/product/add`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(product),
+            body: formData,
             credentials: "include"
         });
 
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
             return { error: data.error || "Nem sikerült létrehozni a terméket." };
@@ -174,16 +217,25 @@ export async function createProduct(product) {
 
 export async function updateProduct(product) {
     try {
+        const formData = new FormData();
+
+        formData.append("product_id", product.product_id ?? "");
+        formData.append("category_id", product.category_id ?? "");
+        formData.append("product_name", product.product_name ?? "");
+        formData.append("product_price", product.product_price ?? "");
+        formData.append("product_stock", product.product_stock ?? "");
+
+        if (product.product_image instanceof File) {
+            formData.append("product_image", product.product_image);
+        }
+
         const res = await fetch(`${BACKEND_URL}/product/update`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(product),
+            body: formData,
             credentials: "include"
         });
 
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
             return { error: data.error || "Nem sikerült módosítani a terméket." };
@@ -203,7 +255,7 @@ export async function deleteProduct(product_id) {
             credentials: "include"
         });
 
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
 
         if (!res.ok) {
             return { error: data.error || "Nem sikerült törölni a terméket." };
