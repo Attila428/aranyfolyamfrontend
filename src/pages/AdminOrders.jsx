@@ -5,6 +5,16 @@ import { getAllOrders, updateOrderStatus } from "../api/api";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+
+function getImageSrc(imagePath) {
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+        return imagePath;
+    }
+    return `${BACKEND_URL}${imagePath}`;
+}
+
 export default function AdminOrders() {
     const { user, loading, errorUser, onLogout } = useAuth();
     const [orders, setOrders] = useState([]);
@@ -24,9 +34,8 @@ export default function AdminOrders() {
             }
 
             setError("");
-            setOrders(data || []);
+            setOrders(Array.isArray(data) ? data : []);
         }
-        
 
         if (!loading && user?.user_role === "admin") {
             fetchOrders();
@@ -55,6 +64,7 @@ export default function AdminOrders() {
             grouped[row.order_id].items.push({
                 product_id: row.product_id,
                 product_name: row.product_name,
+                product_image: row.product_image || "",
                 product_price: Number(row.product_price || 0),
                 order_count: Number(row.order_count || 0),
                 item_total: itemTotal
@@ -75,7 +85,6 @@ export default function AdminOrders() {
 
     async function handleSaveStatus(order_id) {
         const selectedStatus = editedStatuses[order_id];
-
         if (!selectedStatus) return;
 
         setSavingOrderId(order_id);
@@ -152,11 +161,9 @@ export default function AdminOrders() {
             >
                 <div className="container">
                     <div className="mx-auto" style={{ maxWidth: "1200px" }}>
-                        <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3 mb-4">
-                            <h1 className="text-white text-center text-md-start mb-0">
-                                Összes rendelés kezelése
-                            </h1>
-                        </div>
+                        <h1 className="text-white text-center text-md-start mb-4">
+                            Összes rendelés kezelése
+                        </h1>
 
                         {errorUser && (
                             <div className="alert alert-danger text-center rounded-4">
@@ -198,36 +205,22 @@ export default function AdminOrders() {
                                         >
                                             <div className="row g-3 mb-3">
                                                 <div className="col-12 col-md-6 col-xl-3">
-                                                    <div className="fw-semibold text-light">
-                                                        Rendelés azonosító:
-                                                    </div>
-                                                    <div className="text-dark fw-bold">
-                                                        #{order.order_id}
-                                                    </div>
+                                                    <div className="fw-semibold text-light">Rendelés azonosító:</div>
+                                                    <div className="text-dark fw-bold">#{order.order_id}</div>
                                                 </div>
 
                                                 <div className="col-12 col-md-6 col-xl-3">
-                                                    <div className="fw-semibold text-light">
-                                                        Felhasználó ID:
-                                                    </div>
-                                                    <div className="text-dark fw-bold">
-                                                        {order.user_id}
-                                                    </div>
+                                                    <div className="fw-semibold text-light">Felhasználó ID:</div>
+                                                    <div className="text-dark fw-bold">{order.user_id}</div>
                                                 </div>
 
                                                 <div className="col-12 col-md-6 col-xl-3">
-                                                    <div className="fw-semibold text-light">
-                                                        Felhasználónév:
-                                                    </div>
-                                                    <div className="text-dark fw-bold text-break">
-                                                        {order.user_username}
-                                                    </div>
+                                                    <div className="fw-semibold text-light">Felhasználónév:</div>
+                                                    <div className="text-dark fw-bold text-break">{order.user_username}</div>
                                                 </div>
 
                                                 <div className="col-12 col-md-6 col-xl-3">
-                                                    <div className="fw-semibold text-light">
-                                                        Rendelés dátuma:
-                                                    </div>
+                                                    <div className="fw-semibold text-light">Rendelés dátuma:</div>
                                                     <div className="text-dark fw-bold">
                                                         {new Date(order.order_date).toLocaleString("hu-HU")}
                                                     </div>
@@ -236,20 +229,14 @@ export default function AdminOrders() {
 
                                             <div className="row g-3 mb-4">
                                                 <div className="col-12 col-md-6">
-                                                    <div className="fw-semibold text-light mb-1">
-                                                        Jelenlegi státusz:
-                                                    </div>
-                                                    <div>
-                                                        <span className={`badge ${getStatusBadgeClass(order.order_status)} fs-6`}>
-                                                            {translateStatus(order.order_status)}
-                                                        </span>
-                                                    </div>
+                                                    <div className="fw-semibold text-light mb-1">Jelenlegi státusz:</div>
+                                                    <span className={`badge ${getStatusBadgeClass(order.order_status)} fs-6`}>
+                                                        {translateStatus(order.order_status)}
+                                                    </span>
                                                 </div>
 
                                                 <div className="col-12 col-md-6">
-                                                    <div className="fw-semibold text-light mb-1">
-                                                        Végösszeg:
-                                                    </div>
+                                                    <div className="fw-semibold text-light mb-1">Végösszeg:</div>
                                                     <div className="text-dark fw-bold">
                                                         {order.total.toLocaleString("hu-HU")} Ft
                                                     </div>
@@ -257,9 +244,7 @@ export default function AdminOrders() {
                                             </div>
 
                                             <div className="mb-3">
-                                                <div className="fw-semibold text-light mb-2">
-                                                    Rendelt termékek:
-                                                </div>
+                                                <div className="fw-semibold text-light mb-2">Rendelt termékek:</div>
 
                                                 <div className="d-flex flex-column gap-3">
                                                     {order.items.map((item, index) => (
@@ -267,45 +252,53 @@ export default function AdminOrders() {
                                                             key={`${order.order_id}-${item.product_id}-${index}`}
                                                             className="bg-light rounded-4 p-3 border"
                                                         >
-                                                            <div className="row g-2">
-                                                                <div className="col-12 col-md-6 col-xl-3">
-                                                                    <div className="fw-semibold">
-                                                                        Termék neve:
-                                                                    </div>
-                                                                    <div className="text-break">
-                                                                        {item.product_name}
-                                                                    </div>
+                                                            <div className="row g-3 align-items-center">
+                                                                <div className="col-12 col-md-3 col-xl-2">
+                                                                    {item.product_image ? (
+                                                                        <img
+                                                                            src={getImageSrc(item.product_image)}
+                                                                            alt={item.product_name}
+                                                                            className="img-fluid rounded-3 border"
+                                                                            style={{
+                                                                                width: "100%",
+                                                                                height: "120px",
+                                                                                objectFit: "cover"
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="border rounded-3 d-flex align-items-center justify-content-center bg-white text-muted"
+                                                                            style={{ height: "120px" }}>
+                                                                            Nincs kép
+                                                                        </div>
+                                                                    )}
                                                                 </div>
 
-                                                                <div className="col-12 col-md-6 col-xl-3">
-                                                                    <div className="fw-semibold">
-                                                                        Termék ID:
-                                                                    </div>
-                                                                    <div>{item.product_id}</div>
-                                                                </div>
+                                                                <div className="col-12 col-md-9 col-xl-10">
+                                                                    <div className="row g-2">
+                                                                        <div className="col-12 col-md-6 col-xl-3">
+                                                                            <div className="fw-semibold">Termék neve:</div>
+                                                                            <div className="text-break">{item.product_name}</div>
+                                                                        </div>
 
-                                                                <div className="col-12 col-md-4 col-xl-2">
-                                                                    <div className="fw-semibold">
-                                                                        Egységár:
-                                                                    </div>
-                                                                    <div>
-                                                                        {item.product_price.toLocaleString("hu-HU")} Ft
-                                                                    </div>
-                                                                </div>
+                                                                        <div className="col-12 col-md-6 col-xl-2">
+                                                                            <div className="fw-semibold">Termék ID:</div>
+                                                                            <div>{item.product_id}</div>
+                                                                        </div>
 
-                                                                <div className="col-12 col-md-4 col-xl-2">
-                                                                    <div className="fw-semibold">
-                                                                        Darabszám:
-                                                                    </div>
-                                                                    <div>{item.order_count} db</div>
-                                                                </div>
+                                                                        <div className="col-12 col-md-4 col-xl-2">
+                                                                            <div className="fw-semibold">Egységár:</div>
+                                                                            <div>{item.product_price.toLocaleString("hu-HU")} Ft</div>
+                                                                        </div>
 
-                                                                <div className="col-12 col-md-4 col-xl-2">
-                                                                    <div className="fw-semibold">
-                                                                        Összesen:
-                                                                    </div>
-                                                                    <div>
-                                                                        {item.item_total.toLocaleString("hu-HU")} Ft
+                                                                        <div className="col-12 col-md-4 col-xl-2">
+                                                                            <div className="fw-semibold">Darabszám:</div>
+                                                                            <div>{item.order_count} db</div>
+                                                                        </div>
+
+                                                                        <div className="col-12 col-md-4 col-xl-3">
+                                                                            <div className="fw-semibold">Összesen:</div>
+                                                                            <div>{item.item_total.toLocaleString("hu-HU")} Ft</div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -323,10 +316,7 @@ export default function AdminOrders() {
                                                         className="form-select"
                                                         value={currentSelectedStatus}
                                                         onChange={(e) =>
-                                                            handleStatusSelect(
-                                                                order.order_id,
-                                                                e.target.value
-                                                            )
+                                                            handleStatusSelect(order.order_id, e.target.value)
                                                         }
                                                     >
                                                         <option value="shipping">Szállítás alatt</option>
@@ -341,9 +331,7 @@ export default function AdminOrders() {
                                                         onClick={() => handleSaveStatus(order.order_id)}
                                                         disabled={!hasChanges || savingOrderId === order.order_id}
                                                     >
-                                                        {savingOrderId === order.order_id
-                                                            ? "Mentés..."
-                                                            : "Státusz mentése"}
+                                                        {savingOrderId === order.order_id ? "Mentés..." : "Státusz mentése"}
                                                     </button>
                                                 </div>
                                             </div>

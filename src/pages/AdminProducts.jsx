@@ -10,6 +10,25 @@ import {
     deleteProduct
 } from "../api/api";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+
+function getImageSrc(imagePath) {
+    if (!imagePath) return "";
+    if (imagePath instanceof File) {
+        return URL.createObjectURL(imagePath);
+    }
+    if (
+        typeof imagePath === "string" &&
+        (imagePath.startsWith("http://") || imagePath.startsWith("https://"))
+    ) {
+        return imagePath;
+    }
+    if (typeof imagePath === "string") {
+        return `${BACKEND_URL}${imagePath}`;
+    }
+    return "";
+}
+
 export default function AdminProducts() {
     const { user, loading, errorUser, onLogout } = useAuth();
 
@@ -26,7 +45,7 @@ export default function AdminProducts() {
         category_id: "",
         product_name: "",
         product_price: "",
-        product_image: "",
+        product_image: null,
         product_stock: ""
     });
 
@@ -40,7 +59,16 @@ export default function AdminProducts() {
                 return;
             }
 
-            setProducts(Array.isArray(data) ? data : []);
+            const normalized = (Array.isArray(data) ? data : []).map((product) => ({
+                ...product,
+                product_image_file: null,
+                original_category_id: product.category_id ?? "",
+                original_product_name: product.product_name ?? "",
+                original_product_price: product.product_price ?? "",
+                original_product_stock: product.product_stock ?? ""
+            }));
+
+            setProducts(normalized);
             setProductsError("");
         }
 
@@ -59,30 +87,103 @@ export default function AdminProducts() {
         );
     }
 
+    function handleImageFileChange(productId, file) {
+        setProducts((prev) =>
+            prev.map((product) =>
+                product.product_id === productId
+                    ? { ...product, product_image_file: file || null }
+                    : product
+            )
+        );
+    }
+
     async function handleSaveProduct(product) {
         setProductsError("");
         setSuccessMessage("");
+        setSavingId(product.product_id);
 
-        if ((product.product_image || "").length > 100) {
-            setProductsError("A termék kép linkje maximum 100 karakter lehet.");
+        const updatedFields = {
+            product_id: product.product_id
+        };
+
+        const currentCategoryId = String(product.category_id ?? "").trim();
+        const originalCategoryId = String(product.original_category_id ?? "").trim();
+
+        const currentProductName = String(product.product_name ?? "").trim();
+        const originalProductName = String(product.original_product_name ?? "").trim();
+
+        const currentProductPrice = String(product.product_price ?? "").trim();
+        const originalProductPrice = String(product.original_product_price ?? "").trim();
+
+        const currentProductStock = String(product.product_stock ?? "").trim();
+        const originalProductStock = String(product.original_product_stock ?? "").trim();
+
+        if (currentCategoryId !== originalCategoryId) {
+            if (!currentCategoryId) {
+                setProductsError("A kategória azonosító nem lehet üres.");
+                setSavingId(null);
+                return;
+            }
+            updatedFields.category_id = Number(currentCategoryId);
+        }
+
+        if (currentProductName !== originalProductName) {
+            if (!currentProductName) {
+                setProductsError("A termék neve nem lehet üres.");
+                setSavingId(null);
+                return;
+            }
+            updatedFields.product_name = currentProductName;
+        }
+
+        if (currentProductPrice !== originalProductPrice) {
+            if (!currentProductPrice) {
+                setProductsError("Az ár nem lehet üres.");
+                setSavingId(null);
+                return;
+            }
+            updatedFields.product_price = Number(currentProductPrice);
+        }
+
+        if (currentProductStock !== originalProductStock) {
+            if (!currentProductStock) {
+                setProductsError("A készlet nem lehet üres.");
+                setSavingId(null);
+                return;
+            }
+            updatedFields.product_stock = Number(currentProductStock);
+        }
+
+        if (product.product_image_file) {
+            updatedFields.product_image = product.product_image_file;
+        }
+
+        if (Object.keys(updatedFields).length === 1) {
+            setProductsError("Nincs menthető módosítás.");
+            setSavingId(null);
             return;
         }
 
-        setSavingId(product.product_id);
-
-        const res = await updateProduct({
-            product_id: product.product_id,
-            category_id: Number(product.category_id),
-            product_name: product.product_name,
-            product_price: Number(product.product_price),
-            product_image: product.product_image,
-            product_stock: Number(product.product_stock)
-        });
+        const res = await updateProduct(updatedFields);
 
         if (res?.error) {
             setProductsError(res.error);
             setSavingId(null);
             return;
+        }
+
+        const refreshed = await getAllProduct();
+        if (!refreshed?.error) {
+            setProducts(
+                (Array.isArray(refreshed) ? refreshed : []).map((item) => ({
+                    ...item,
+                    product_image_file: null,
+                    original_category_id: item.category_id ?? "",
+                    original_product_name: item.product_name ?? "",
+                    original_product_price: item.product_price ?? "",
+                    original_product_stock: item.product_stock ?? ""
+                }))
+            );
         }
 
         setSuccessMessage(`A(z) #${product.product_id} termék sikeresen módosítva.`);
@@ -116,21 +217,16 @@ export default function AdminProducts() {
             newProduct.category_id === "" ||
             !newProduct.product_name.trim() ||
             newProduct.product_price === "" ||
-            !newProduct.product_image.trim() ||
+            !newProduct.product_image ||
             newProduct.product_stock === ""
         ) {
             setModalError("Minden mező kitöltése kötelező.");
             return;
         }
 
-        if (newProduct.product_image.length > 100) {
-            setModalError("A termék kép linkje maximum 100 karakter lehet.");
-            return;
-        }
-
         const res = await createProduct({
             category_id: Number(newProduct.category_id),
-            product_name: newProduct.product_name,
+            product_name: newProduct.product_name.trim(),
             product_price: Number(newProduct.product_price),
             product_image: newProduct.product_image,
             product_stock: Number(newProduct.product_stock)
@@ -144,14 +240,23 @@ export default function AdminProducts() {
         const refreshed = await getAllProduct();
 
         if (!refreshed?.error) {
-            setProducts(Array.isArray(refreshed) ? refreshed : []);
+            setProducts(
+                (Array.isArray(refreshed) ? refreshed : []).map((item) => ({
+                    ...item,
+                    product_image_file: null,
+                    original_category_id: item.category_id ?? "",
+                    original_product_name: item.product_name ?? "",
+                    original_product_price: item.product_price ?? "",
+                    original_product_stock: item.product_stock ?? ""
+                }))
+            );
         }
 
         setNewProduct({
             category_id: "",
             product_name: "",
             product_price: "",
-            product_image: "",
+            product_image: null,
             product_stock: ""
         });
         setShowModal(false);
@@ -225,11 +330,9 @@ export default function AdminProducts() {
                                     >
                                         <div className="row g-3">
                                             <div className="col-12 col-xl-2">
-                                                <div className="fw-semibold text-light mb-2">
-                                                    Kép
-                                                </div>
+                                                <div className="fw-semibold text-light mb-2">Kép</div>
                                                 <img
-                                                    src={product.product_image}
+                                                    src={getImageSrc(product.product_image_file || product.product_image)}
                                                     alt={product.product_name}
                                                     className="img-fluid rounded-3 border bg-light"
                                                     style={{
@@ -306,24 +409,19 @@ export default function AdminProducts() {
 
                                                     <div className="col-12 col-md-6">
                                                         <label className="form-label text-light fw-semibold">
-                                                            Termék kép linkje
+                                                            Új termékkép
                                                         </label>
                                                         <input
-                                                            type="text"
+                                                            type="file"
                                                             className="form-control"
-                                                            maxLength={100}
-                                                            value={product.product_image || ""}
+                                                            accept="image/png,image/jpeg,image/jpg,image/webp"
                                                             onChange={(e) =>
-                                                                handleFieldChange(
+                                                                handleImageFileChange(
                                                                     product.product_id,
-                                                                    "product_image",
-                                                                    e.target.value
+                                                                    e.target.files?.[0] || null
                                                                 )
                                                             }
                                                         />
-                                                        <div className="form-text text-light">
-                                                            Maximum 100 karakter
-                                                        </div>
                                                     </div>
 
                                                     <div className="col-12 col-md-6">
@@ -369,21 +467,15 @@ export default function AdminProducts() {
                                                         onClick={() => handleSaveProduct(product)}
                                                         disabled={savingId === product.product_id}
                                                     >
-                                                        {savingId === product.product_id
-                                                            ? "Mentés..."
-                                                            : "Módosítások mentése"}
+                                                        {savingId === product.product_id ? "Mentés..." : "Módosítások mentése"}
                                                     </button>
 
                                                     <button
                                                         className="btn btn-danger fw-bold w-100"
-                                                        onClick={() =>
-                                                            handleDeleteProduct(product.product_id)
-                                                        }
+                                                        onClick={() => handleDeleteProduct(product.product_id)}
                                                         disabled={deletingId === product.product_id}
                                                     >
-                                                        {deletingId === product.product_id
-                                                            ? "Törlés..."
-                                                            : "Termék törlése"}
+                                                        {deletingId === product.product_id ? "Törlés..." : "Termék törlése"}
                                                     </button>
                                                 </div>
                                             </div>
@@ -416,9 +508,7 @@ export default function AdminProducts() {
                             <div className="modal-body">
                                 <div className="row g-3">
                                     <div className="col-12 col-md-6">
-                                        <label className="form-label fw-semibold">
-                                            Kategória azonosító
-                                        </label>
+                                        <label className="form-label fw-semibold">Kategória azonosító</label>
                                         <input
                                             type="number"
                                             className="form-control"
@@ -433,9 +523,7 @@ export default function AdminProducts() {
                                     </div>
 
                                     <div className="col-12 col-md-6">
-                                        <label className="form-label fw-semibold">
-                                            Termék neve
-                                        </label>
+                                        <label className="form-label fw-semibold">Termék neve</label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -450,9 +538,7 @@ export default function AdminProducts() {
                                     </div>
 
                                     <div className="col-12 col-md-6">
-                                        <label className="form-label fw-semibold">
-                                            Ár
-                                        </label>
+                                        <label className="form-label fw-semibold">Ár</label>
                                         <input
                                             type="number"
                                             className="form-control"
@@ -467,9 +553,7 @@ export default function AdminProducts() {
                                     </div>
 
                                     <div className="col-12 col-md-6">
-                                        <label className="form-label fw-semibold">
-                                            Készlet
-                                        </label>
+                                        <label className="form-label fw-semibold">Készlet</label>
                                         <input
                                             type="number"
                                             className="form-control"
@@ -484,24 +568,18 @@ export default function AdminProducts() {
                                     </div>
 
                                     <div className="col-12">
-                                        <label className="form-label fw-semibold">
-                                            Kép link
-                                        </label>
+                                        <label className="form-label fw-semibold">Kép feltöltése</label>
                                         <input
-                                            type="text"
+                                            type="file"
                                             className="form-control"
-                                            maxLength={100}
-                                            value={newProduct.product_image}
+                                            accept="image/png,image/jpeg,image/jpg,image/webp"
                                             onChange={(e) =>
                                                 setNewProduct((prev) => ({
                                                     ...prev,
-                                                    product_image: e.target.value
+                                                    product_image: e.target.files?.[0] || null
                                                 }))
                                             }
                                         />
-                                        <div className="form-text">
-                                            Maximum 100 karakter
-                                        </div>
                                     </div>
                                 </div>
 
