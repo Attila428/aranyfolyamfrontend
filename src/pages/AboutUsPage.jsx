@@ -1,7 +1,7 @@
 import NavBar from "../components/NavBar"
 import { useEffect, useState } from "react"
 import { whoami,logout } from '../users'
-import Footer from "../components/Footer"
+import Footer from "../components/Footer" 
 
 
 export default function AboutUs(){
