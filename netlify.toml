@@ -22,19 +22,19 @@
 
 [[redirects]]
   from = "/product/*"
-  to = "https://nodejs213.dszcbaross.edu.hu/product"
+  to = "https://nodejs213.dszcbaross.edu.hu/product/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/category/*"
-  to = "https://nodejs213.dszcbaross.edu.hu/category"
+  to = "https://nodejs213.dszcbaross.edu.hu/category/:splat"
   status = 200
   force = true
 
 [[redirects]]
 from = "/orders/*"
-to = "https://nodejs213.dszcbaross.edu.hu/orders"
+to = "https://nodejs213.dszcbaross.edu.hu/orders/:splat"
 status = 200
 force = true
 
