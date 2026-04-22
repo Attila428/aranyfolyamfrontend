@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const PROXYTARGET = 'http://localhost:4000'
+const PROXYTARGET = 'https://nodejs213.dszcbaross.edu.hu'
 
 // https://vite.dev/config/
 export default defineConfig({
