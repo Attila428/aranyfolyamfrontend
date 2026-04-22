@@ -1,4 +1,4 @@
-import Button from "./button";
+import Button from "./Button";
 import { deleteUser } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";

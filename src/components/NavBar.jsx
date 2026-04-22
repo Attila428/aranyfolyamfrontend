@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Button from "./button";
+import Button from "./Button";
 import { Link } from "react-router-dom";
 import logo from "../assets/aranyfolyamlogo.png";
 

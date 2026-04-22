@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import InputField from '../components/InputField.jsx'
-import Button from '../components/button.jsx'
+import Button from '../components/Button.jsx'
 import { register } from '../users.js'
 
 import Footer from "../components/Footer"
