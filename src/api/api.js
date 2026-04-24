@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://localhost:4000";
+const BACKEND_URL = "https://nodejs213.dszcbaross.edu.hu";
 
 async function parseJsonSafe(res) {
     try {
