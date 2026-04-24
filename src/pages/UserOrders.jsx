@@ -12,7 +12,7 @@ function getImageSrc(imagePath) {
     if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
         return imagePath;
     }
-    return `${BACKEND_URL}${imagePath}`;
+    return `${imagePath}`;
 }
 
 export default function UserOrders() {

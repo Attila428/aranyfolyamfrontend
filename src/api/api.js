@@ -1,5 +1,5 @@
 const BACKEND_URL = "https://nodejs213.dszcbaross.edu.hu"; 
-//asd
+
 async function parseJsonSafe(res) {
     try {
         return await res.json();
@@ -10,7 +10,7 @@ async function parseJsonSafe(res) {
 
 export async function getUsers() {
     try {
-        const res = await fetch(`${BACKEND_URL}/admin/users`, {
+        const res = await fetch(`/admin/users`, {
             method: "GET",
             credentials: "include"
         });
@@ -30,7 +30,7 @@ export async function getUsers() {
 
 export async function deleteUser(user_id) {
     try {
-        const res = await fetch(`${BACKEND_URL}/admin/delete/user/${user_id}`, {
+        const res = await fetch(`/admin/delete/user/${user_id}`, {
             method: "DELETE",
             credentials: "include"
         });
@@ -50,7 +50,7 @@ export async function deleteUser(user_id) {
 
 export async function editUser(user_id, user_username, user_email, user_role) {
     try {
-        const res = await fetch(`${BACKEND_URL}/admin/update/user/${user_id}`, {
+        const res = await fetch(`/admin/update/user/${user_id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -74,7 +74,7 @@ export async function editUser(user_id, user_username, user_email, user_role) {
 
 export async function getAllProduct() {
     try {
-        const res = await fetch(`${BACKEND_URL}/product/all`, {
+        const res = await fetch(`/product/all`, {
             method: "GET",
             credentials: "include"
         });
@@ -94,7 +94,7 @@ export async function getAllProduct() {
 
 export async function createOrder(user_id, items) {
     try {
-        const res = await fetch(`${BACKEND_URL}/orders`, {
+        const res = await fetch(`/orders`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -118,7 +118,7 @@ export async function createOrder(user_id, items) {
 
 export async function getUserOrders(user_id) {
     try {
-        const res = await fetch(`${BACKEND_URL}/orders/${user_id}`, {
+        const res = await fetch(`/orders/${user_id}`, {
             method: "GET",
             credentials: "include"
         });
@@ -138,7 +138,7 @@ export async function getUserOrders(user_id) {
 
 export async function getAllOrders() {
     try {
-        const res = await fetch(`${BACKEND_URL}/orders`, {
+        const res = await fetch(`/orders`, {
             method: "GET",
             credentials: "include"
         });
@@ -158,7 +158,7 @@ export async function getAllOrders() {
 
 export async function updateOrderStatus(order_id, status) {
     try {
-        const res = await fetch(`${BACKEND_URL}/orders/${order_id}`, {
+        const res = await fetch(`/orders/${order_id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -196,7 +196,7 @@ export async function createProduct(product) {
             formData.append("product_image", product.product_image);
         }
 
-        const res = await fetch(`${BACKEND_URL}/product/add`, {
+        const res = await fetch(`/product/add`, {
             method: "POST",
             body: formData,
             credentials: "include"
@@ -229,7 +229,7 @@ export async function updateProduct(product) {
             formData.append("product_image", product.product_image);
         }
 
-        const res = await fetch(`${BACKEND_URL}/product/update`, {
+        const res = await fetch(`/product/update`, {
             method: "PUT",
             body: formData,
             credentials: "include"
@@ -250,7 +250,7 @@ export async function updateProduct(product) {
 
 export async function deleteProduct(product_id) {
     try {
-        const res = await fetch(`${BACKEND_URL}/product/del/${product_id}`, {
+        const res = await fetch(`/product/del/${product_id}`, {
             method: "DELETE",
             credentials: "include"
         });
