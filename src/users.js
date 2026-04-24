@@ -1,7 +1,5 @@
-const BACKEND_URL = 'users'
-
 export async function register(user_email, user_username, user_psw) {
-    const res = await fetch(`${BACKEND_URL}/register`, {
+    const res = await fetch(`/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -16,7 +14,7 @@ export async function register(user_email, user_username, user_psw) {
 }
 
 export async function login(user_email, user_psw) {
-    const res = await fetch(`${BACKEND_URL}/login`, {
+    const res = await fetch(`/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -36,7 +34,7 @@ export async function login(user_email, user_psw) {
 // whoami
 
 export async function whoami() {
-    const res = await fetch(`${BACKEND_URL}/whoami`,{
+    const res = await fetch(`/whoami`,{
         method: 'GET',
         credentials : 'include'
     })
@@ -52,7 +50,7 @@ export async function whoami() {
 // logout   
 
 export async function logout() {
-    const res = await fetch(`${BACKEND_URL}/logout`, {
+    const res = await fetch(`/logout`, {
         method: 'POST',
         credentials: 'include',
     })
@@ -64,7 +62,7 @@ export async function logout() {
 }
 
 export async function updateProfile({ username, email, psw }) {
-  const res = await fetch(`${BACKEND_URL}/edit`, {
+  const res = await fetch(`/edit`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json"
