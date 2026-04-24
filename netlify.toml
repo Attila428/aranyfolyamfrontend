@@ -39,6 +39,12 @@ status = 200
 force = true
 
 [[redirects]]
+from = "/admin/users/*"
+to = "https://nodejs213.dszcbaross.edu.hu/orders/:splat"
+status = 200
+force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
