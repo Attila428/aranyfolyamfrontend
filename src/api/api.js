@@ -194,7 +194,7 @@ export async function createProduct(product) {
             formData.append("product_image", product.product_image);
         }
 
-        const res = await fetch(`${BACKEND_URL}/product/add`, {
+        const res = await fetch(`/product/add`, {
             method: "POST",
             body: formData,
             credentials: "include"
