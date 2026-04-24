@@ -6,7 +6,7 @@ import { getAllProduct, createOrder } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://nodejs213.dszcbaross.edu.hu";
 
 function getImageSrc(imagePath) {
     if (!imagePath) return "";
