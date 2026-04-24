@@ -24,7 +24,7 @@ function getImageSrc(imagePath) {
         return imagePath;
     }
     if (typeof imagePath === "string") {
-        return `${BACKEND_URL}${imagePath}`;
+        return `${imagePath}`;
     }
     return "";
 }
