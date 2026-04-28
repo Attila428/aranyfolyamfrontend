@@ -1,5 +1,7 @@
 🎨 AranyFolyam Frontend
+
 🗒️ Tartalomjegyzék
+
 Bevezetés
 Projekt szerkezet
 Fő funkciók
@@ -11,6 +13,7 @@ Oldalak
 Komponensek
 Technológiai stack
 Fejlesztési lehetőségek
+
 🏪 Bevezetés
 
 Az AranyFolyam Frontend egy React alapú webalkalmazás, amely a zálogház backend rendszerhez készült felhasználói felületet biztosít.
@@ -26,6 +29,7 @@ Profil adatok megtekintését
 A rendszer REST API-n keresztül kommunikál a backenddel.
 
 📁 Projekt szerkezet
+
 ├── public/
 ├── src/
 │   ├── api/
@@ -60,23 +64,33 @@ A rendszer REST API-n keresztül kommunikál a backenddel.
 ├── package.json
 ├── vite.config.js
 └── README.md
+
 🚀 Fő funkciók
+
 👤 Felhasználók
+
 Regisztráció és bejelentkezés
 Profil megtekintése
 Saját rendelések listázása
+
 📦 Termékek
+
 Termékek megjelenítése
 Részletes termék nézet
 Admin által kezelhető (CRUD)
+
 🛒 Rendelések
+
 Rendelések létrehozása
 Saját rendelések követése
 Admin rendeléskezelés
+
 🔐 Admin funkciók
+
 Felhasználók kezelése
 Termékek kezelése
 Rendelések áttekintése
+
 🧠 Állapotkezelés
 
 A projekt React Context API-t használ.
