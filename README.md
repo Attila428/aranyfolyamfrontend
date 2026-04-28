@@ -1,18 +1,216 @@
-# React + Vite
+# 🎨 AranyFolyam Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🗒️ Tartalomjegyzék
 
-Currently, two official plugins are available:
+* [Bevezetés](#bevezetés)
+* [Projekt szerkezet](#projekt-szerkezet)
+* [Fő funkciók](#fő-funkciók)
+* [Állapotkezelés](#állapotkezelés)
+* [API kommunikáció](#api-kommunikáció)
+* [Telepítés](#telepítés)
+* [Használat](#használat)
+* [Oldalak](#oldalak)
+* [Komponensek](#komponensek)
+* [Technológiai stack](#technológiai-stack)
+* [Fejlesztési lehetőségek](#fejlesztési-lehetőségek)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🏪 Bevezetés
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Az **AranyFolyam Frontend** egy React alapú webalkalmazás, amely a zálogház backend rendszerhez készült felhasználói felületet biztosít.
 
-Note: This will impact Vite dev & build performances.
+A frontend lehetővé teszi:
 
-## Expanding the ESLint configuration
+* Felhasználók regisztrációját és bejelentkezését  
+* Termékek (zálogtárgyak) böngészését  
+* Rendelések (zálog ügyletek) kezelését  
+* Admin felület használatát  
+* Profil adatok megtekintését  
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+A rendszer REST API-n keresztül kommunikál a backenddel.
+
+---
+
+## 📁 Projekt szerkezet
+
+```text
+├── public/
+├── src/
+│   ├── api/
+│   │   └── api.js
+│   ├── assets/
+│   │   ├── aranyfolyamlogo.png
+│   │   └── react.svg
+│   ├── components/
+│   │   ├── Button.jsx
+│   │   ├── EditUserByAdmin.jsx
+│   │   ├── Footer.jsx
+│   │   ├── InputField.jsx
+│   │   ├── NavBar.jsx
+│   │   ├── Product.jsx
+│   │   └── User.jsx
+│   ├── context/
+│   │   └── AuthContext.jsx
+│   ├── pages/
+│   │   ├── AboutUsPage.jsx
+│   │   ├── AdminOrders.jsx
+│   │   ├── AdminPanel.jsx
+│   │   ├── AdminProducts.jsx
+│   │   ├── LoginPage.jsx
+│   │   ├── ProductPage.jsx
+│   │   ├── Profil.jsx
+│   │   ├── RegisterPage.jsx
+│   │   └── UserOrders.jsx
+│   ├── inputfield.css
+│   ├── main.jsx
+│   └── users.js
+├── index.html
+├── package.json
+├── vite.config.js
+└── README.md
+```
+
+---
+
+## 🚀 Fő funkciók
+
+### 👤 Felhasználók
+- Regisztráció és bejelentkezés  
+- Profil megtekintése  
+- Saját rendelések listázása  
+
+### 📦 Termékek
+- Termékek megjelenítése  
+- Részletes termék nézet  
+- Admin által kezelhető (CRUD)  
+
+### 🛒 Rendelések
+- Rendelések létrehozása  
+- Saját rendelések követése  
+- Admin rendeléskezelés  
+
+### 🔐 Admin funkciók
+- Felhasználók kezelése  
+- Termékek kezelése  
+- Rendelések áttekintése  
+
+---
+
+## 🧠 Állapotkezelés
+
+A projekt **React Context API-t** használ.
+
+### 📌 AuthContext
+- felhasználó adatok tárolása  
+- JWT token kezelése  
+- bejelentkezési állapot  
+
+Ez globális state-ként működik az egész alkalmazásban.
+
+---
+
+## 🔌 API kommunikáció
+
+Az API hívások a következő fájlban találhatók:
+
+```text
+src/api/api.js
+```
+
+Feladata:
+- HTTP kérések kezelése (GET, POST, PUT, DELETE)  
+- backend endpointok elérése  
+- token továbbítása  
+
+A frontend a backend REST API-hoz kapcsolódik.
+
+---
+
+## ⬇️ Telepítés
+
+1. Klónozd a projektet:
+
+```bash
+git clone <frontend-repo-link>
+```
+
+2. Lépj be a mappába:
+
+```bash
+cd sajatfrontend
+```
+
+3. Függőségek telepítése:
+
+```bash
+npm install
+```
+
+---
+
+## 🛍️ Használat
+
+Fejlesztői mód:
+
+```bash
+npm run dev
+```
+
+Alapértelmezett cím:
+
+```text
+https://aranyfolyam.netlify.app/#/
+```
+
+---
+
+## 📄 Oldalak
+
+| Oldal | Leírás |
+|---|---|
+| LoginPage | Bejelentkezés |
+| RegisterPage | Regisztráció |
+| ProductPage | Termékek listázása |
+| Profil | Felhasználói profil |
+| UserOrders | Saját rendelések |
+| AdminPanel | Admin dashboard |
+| AdminProducts | Termék kezelés |
+| AdminOrders | Rendelések kezelése |
+| AboutUsPage | Információs oldal |
+
+---
+
+## 🧩 Komponensek
+
+| Komponens | Leírás |
+|---|---|
+| NavBar | Navigáció |
+| Footer | Lábléc |
+| Product | Termék megjelenítés |
+| User | Felhasználó megjelenítés |
+| Button | Újrahasználható gomb |
+| InputField | Input mezők |
+| EditUserByAdmin | Admin user szerkesztés |
+
+---
+
+## 📌 Technológiai stack
+
+* React  
+* Vite  
+* JavaScript (ES6+)  
+* Context API  
+* CSS  
+
+---
+
+## 🚀 Fejlesztési lehetőségek
+
+* 🔍 Keresés és szűrés fejlesztése  
+* 📱 Reszponzív design javítása  
+* 🔐 Role-based route védelem bővítése  
+* 📊 Dashboard statisztikák  
+* 🌐 Többnyelvű támogatás  
+* ⚡ Performance optimalizálás  
+* 🎨 UI/UX fejlesztés  
