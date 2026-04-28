@@ -158,10 +158,6 @@ npm run dev
 ```
 
 [Alapértelmezett cím](https://aranyfolyam.netlify.app/#/)
-
-```text
-
-```
 ---
 Teszt felhasználók :
 
@@ -172,8 +168,6 @@ Jelszó : userbemutato
 Admin : 
 Email : adminbemutato@gmail.com
 Jelszó : adminbemutato
-
----
 
 
 ---
