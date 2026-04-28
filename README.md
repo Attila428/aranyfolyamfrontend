@@ -157,11 +157,18 @@ Fejlesztői mód:
 npm run dev
 ```
 
-Alapértelmezett cím:
+[Alapértelmezett cím](https://aranyfolyam.netlify.app/#/)
+---
+Teszt felhasználók :
 
-```text
-https://aranyfolyam.netlify.app/#/
-```
+User : 
+Email : userbemutato@gmail.com
+Jelszó : userbemutato
+
+Admin : 
+Email : adminbemutato@gmail.com
+Jelszó : adminbemutato
+
 
 ---
 
@@ -204,6 +211,11 @@ https://aranyfolyam.netlify.app/#/
 * CSS  
 
 ---
+
+---
+[Figma tervek](https://www.figma.com/design/A2r6P55fo5dbs4IYvBL5Bz/Untitled?node-id=0-1&p=f&t=BSUzRqEVZM73paV8-0)
+---
+
 
 ## 🚀 Fejlesztési lehetőségek
 
