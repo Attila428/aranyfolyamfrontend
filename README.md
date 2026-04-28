@@ -162,6 +162,19 @@ Alapértelmezett cím:
 ```text
 https://aranyfolyam.netlify.app/#/
 ```
+---
+Teszt felhasználók :
+
+User : 
+Email : userbemutato@gmail.com
+Jelszó : userbemutato
+
+Admin : 
+Email : adminbemutato@gmail.com
+Jelszó : adminbemutato
+
+---
+
 
 ---
 
