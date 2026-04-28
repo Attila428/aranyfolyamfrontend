@@ -1,137 +1,109 @@
-# 🎨 AranyFolyam Frontend
+🎨 AranyFolyam Frontend
+🗒️ Tartalomjegyzék
+Bevezetés
+Projekt szerkezet
+Fő funkciók
+Állapotkezelés
+API kommunikáció
+Telepítés
+Használat
+Oldalak
+Komponensek
+Technológiai stack
+Fejlesztési lehetőségek
+🏪 Bevezetés
 
-## 🗒️ Tartalomjegyzék
-
-* [Bevezetés](#bevezetés)
-* [Projekt szerkezet](#projekt-szerkezet)
-* [Fő funkciók](#fő-funkciók)
-* [Állapotkezelés](#állapotkezelés)
-* [API kommunikáció](#api-kommunikáció)
-* [Telepítés](#telepítés)
-* [Használat](#használat)
-* [Oldalak](#oldalak)
-* [Komponensek](#komponensek)
-* [Technológiai stack](#technológiai-stack)
-* [Fejlesztési lehetőségek](#fejlesztési-lehetőségek)
-
----
-
-## 🏪 Bevezetés
-
-Az **AranyFolyam Frontend** egy React alapú webalkalmazás, amely a zálogház backend rendszerhez készült felhasználói felületet biztosít.
+Az AranyFolyam Frontend egy React alapú webalkalmazás, amely a zálogház backend rendszerhez készült felhasználói felületet biztosít.
 
 A frontend lehetővé teszi:
 
-* Felhasználók regisztrációját és bejelentkezését
-* Termékek (zálogtárgyak) böngészését
-* Rendelések (zálog ügyletek) kezelését
-* Admin felület használatát
-* Profil adatok megtekintését
+Felhasználók regisztrációját és bejelentkezését
+Termékek (zálogtárgyak) böngészését
+Rendelések (zálog ügyletek) kezelését
+Admin felület használatát
+Profil adatok megtekintését
 
 A rendszer REST API-n keresztül kommunikál a backenddel.
 
----
-
-## 📁 Projekt szerkezet
-
-
+📁 Projekt szerkezet
 ├── public/
 ├── src/
-│ ├── api/
-│ │ └── api.js
-│ ├── assets/
-│ │ ├── aranyfolyamlogo.png
-│ │ └── react.svg
-│ ├── components/
-│ │ ├── Button.jsx
-│ │ ├── EditUserByAdmin.jsx
-│ │ ├── Footer.jsx
-│ │ ├── InputField.jsx
-│ │ ├── NavBar.jsx
-│ │ ├── Product.jsx
-│ │ └── User.jsx
-│ ├── context/
-│ │ └── AuthContext.jsx
-│ ├── pages/
-│ │ ├── AboutUsPage.jsx
-│ │ ├── AdminOrders.jsx
-│ │ ├── AdminPanel.jsx
-│ │ ├── AdminProducts.jsx
-│ │ ├── LoginPage.jsx
-│ │ ├── ProductPage.jsx
-│ │ ├── Profil.jsx
-│ │ ├── RegisterPage.jsx
-│ │ └── UserOrders.jsx
-│ ├── inputfield.css
-│ ├── main.jsx
-│ └── users.js
+│   ├── api/
+│   │   └── api.js
+│   ├── assets/
+│   │   ├── aranyfolyamlogo.png
+│   │   └── react.svg
+│   ├── components/
+│   │   ├── Button.jsx
+│   │   ├── EditUserByAdmin.jsx
+│   │   ├── Footer.jsx
+│   │   ├── InputField.jsx
+│   │   ├── NavBar.jsx
+│   │   ├── Product.jsx
+│   │   └── User.jsx
+│   ├── context/
+│   │   └── AuthContext.jsx
+│   ├── pages/
+│   │   ├── AboutUsPage.jsx
+│   │   ├── AdminOrders.jsx
+│   │   ├── AdminPanel.jsx
+│   │   ├── AdminProducts.jsx
+│   │   ├── LoginPage.jsx
+│   │   ├── ProductPage.jsx
+│   │   ├── Profil.jsx
+│   │   ├── RegisterPage.jsx
+│   │   └── UserOrders.jsx
+│   ├── inputfield.css
+│   ├── main.jsx
+│   └── users.js
 ├── index.html
 ├── package.json
 ├── vite.config.js
 └── README.md
+🚀 Fő funkciók
+👤 Felhasználók
+Regisztráció és bejelentkezés
+Profil megtekintése
+Saját rendelések listázása
+📦 Termékek
+Termékek megjelenítése
+Részletes termék nézet
+Admin által kezelhető (CRUD)
+🛒 Rendelések
+Rendelések létrehozása
+Saját rendelések követése
+Admin rendeléskezelés
+🔐 Admin funkciók
+Felhasználók kezelése
+Termékek kezelése
+Rendelések áttekintése
+🧠 Állapotkezelés
 
+A projekt React Context API-t használ.
 
----
-
-## 🚀 Fő funkciók
-
-### 👤 Felhasználók
-- Regisztráció és bejelentkezés
-- Profil megtekintése
-- Saját rendelések listázása
-
-### 📦 Termékek
-- Termékek megjelenítése
-- Részletes termék nézet
-- Admin által kezelhető (CRUD)
-
-### 🛒 Rendelések
-- Rendelések létrehozása
-- Saját rendelések követése
-- Admin rendeléskezelés
-
-### 🔐 Admin funkciók
-- Felhasználók kezelése
-- Termékek kezelése
-- Rendelések áttekintése
-
----
-
-## 🧠 Állapotkezelés
-
-A projekt **React Context API-t** használ.
-
-### 📌 AuthContext
-- felhasználó adatok tárolása
-- JWT token kezelése
-- bejelentkezési állapot
+📌 AuthContext
+felhasználó adatok tárolása
+JWT token kezelése
+bejelentkezési állapot
 
 Ez globális state-ként működik az egész alkalmazásban.
 
----
-
-## 🔌 API kommunikáció
+🔌 API kommunikáció
 
 Az API hívások a következő fájlban találhatók:
 
-
 src/api/api.js
 
-
 Feladata:
-- HTTP kérések kezelése (GET, POST, PUT, DELETE)
-- backend endpointok elérése
-- token továbbítása
+
+HTTP kérések kezelése (GET, POST, PUT, DELETE)
+backend endpointok elérése
+token továbbítása
 
 A frontend a backend REST API-hoz kapcsolódik.
 
----
-
-## ⬇️ Telepítés
-
-1. Klónozd a projektet:
-
-```bash
+⬇️ Telepítés
+Klónozd a projektet:
 git clone <frontend-repo-link>
 Lépj be a mappába:
 cd sajatfrontend
@@ -143,9 +115,9 @@ Fejlesztői mód:
 
 npm run dev
 
-Alapértelmezett cím: https://aranyfolyam.netlify.app/#/
+Alapértelmezett cím:
 
-
+https://aranyfolyam.netlify.app/#/
 📄 Oldalak
 Oldal	Leírás
 LoginPage	Bejelentkezés
@@ -172,7 +144,6 @@ Vite
 JavaScript (ES6+)
 Context API
 CSS
-
 🚀 Fejlesztési lehetőségek
 🔍 Keresés és szűrés fejlesztése
 📱 Reszponzív design javítása
